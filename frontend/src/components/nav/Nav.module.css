@@ -15,3 +15,13 @@
     padding: 1.5rem 2.5rem;
   }
 }
+
+/* AN logomark — used on non-homepage routes */
+.logo {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  color: var(--color-gold);
+  line-height: 1;
+  pointer-events: auto;
+}

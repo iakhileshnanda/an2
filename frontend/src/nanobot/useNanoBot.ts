@@ -17,12 +17,14 @@ function clamp(v: number, lo: number, hi: number) {
 }
 
 function getDisplaySize() {
-  return window.innerWidth < 480 ? 64 : 128
+  return window.innerWidth < 480 ? 96 : 160
 }
 
 function getInitPos(displaySize: number) {
+  // Start near the right side, bottom of screen
+  const x = Math.round(window.innerWidth * 0.72 - displaySize / 2)
   return {
-    x: Math.max(MARGIN, Math.min(120, window.innerWidth - displaySize - MARGIN)),
+    x: clamp(x, MARGIN, window.innerWidth - displaySize - MARGIN),
     y: window.innerHeight - displaySize - MARGIN,
   }
 }
@@ -81,18 +83,22 @@ export function useNanoBot() {
     return () => { if (roamTimer.current) clearTimeout(roamTimer.current) }
   }, [scheduleRoam])
 
-  // movement when ROAMING
+  // movement when ROAMING — constrained to center 60% of viewport so Echo stays off corners
   useEffect(() => {
     if (fsm.state !== 'ROAMING') return
-    const maxX = window.innerWidth - displaySize - MARGIN
+    const roamMinX = Math.max(MARGIN, Math.round(window.innerWidth * 0.20))
+    const roamMaxX = Math.min(
+      window.innerWidth - displaySize - MARGIN,
+      Math.round(window.innerWidth * 0.80 - displaySize)
+    )
     const dist =
-      fsm.speed === 'fast' ? 160 + Math.random() * 100 :
+      fsm.speed === 'fast' ? 120 + Math.random() * 80 :
       fsm.speed === 'slow' ? 20 + Math.random() * 40 :
-      60 + Math.random() * 100
+      50 + Math.random() * 80
     const targetX = clamp(
       posRef.current.x + (fsm.facingLeft ? -1 : 1) * dist,
-      MARGIN,
-      maxX
+      roamMinX,
+      roamMaxX
     )
     setPos(p => ({ ...p, x: targetX }))
   }, [fsm.state, fsm.facingLeft, fsm.speed, displaySize])

@@ -18,8 +18,24 @@ interface Props {
 
 const BUBBLE_WIDTH = 272
 
+// Palette — light Cotton base
+const C = {
+  bg:       '#EDEBDE',              // Cotton
+  bgInput:  'rgba(27,23,22,0.05)', // Noir subtle for inputs
+  bgMsg:    'rgba(27,23,22,0.06)', // Noir subtle for user messages
+  border:   'rgba(27,23,22,0.15)',
+  borderDim:'rgba(27,23,22,0.08)',
+  text:     '#1B1716',             // Noir Black
+  textMid:  'rgba(27,23,22,0.6)',
+  textDim:  'rgba(27,23,22,0.38)',
+  textGhost:'rgba(27,23,22,0.22)',
+  cherry:   '#810100',             // Cherry Red
+  cherryMid:'rgba(129,1,0,0.55)',
+  error:    '#810100',
+}
+
 const ROLE_INTROS: Record<Exclude<UserRole, 'none'>, string> = {
-  visitor: "Hey! I'm NanoBot. Ask me anything about Akhilesh or just explore.",
+  visitor: "Hey! I'm Echo. Ask me anything about Akhilesh or just explore.",
   recruiter: "Recruiter mode. Good call. What do you want to know?",
   admin: "Admin access required.",
 }
@@ -37,7 +53,6 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
   const visible = fsm.state === 'TALKING' || fsm.state === 'LEAVING'
   const isLeaving = fsm.state === 'LEAVING'
 
-  // reset internal state when role is re-selected
   useEffect(() => {
     if (fsm.role === null) {
       setMessages([])
@@ -48,7 +63,6 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
     }
   }, [fsm.role])
 
-  // seed the intro message when role is first selected
   useEffect(() => {
     if (fsm.role && fsm.role !== 'none' && messages.length === 0) {
       setMessages([{ role: 'assistant', content: ROLE_INTROS[fsm.role] }])
@@ -58,7 +72,6 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
     }
   }, [fsm.role])
 
-  // auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
@@ -101,7 +114,6 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
     if (e.key === 'Enter') handleAdminSubmit()
   }
 
-  // bubble positioning: above the sprite, centered
   const bubbleLeft = displaySize / 2
 
   return (
@@ -120,11 +132,11 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
             transform: 'translateX(-50%)',
             width: BUBBLE_WIDTH,
             maxWidth: `calc(100vw - 24px)`,
-            background: '#0a0a0a',
-            border: '1px solid #2a2a2a',
+            background: C.bg,
+            border: `1px solid ${C.border}`,
             borderRadius: 10,
             zIndex: 100,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
             fontFamily: 'monospace',
           }}
           onClick={e => e.stopPropagation()}
@@ -139,7 +151,7 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
             height: 0,
             borderLeft: '7px solid transparent',
             borderRight: '7px solid transparent',
-            borderTop: '8px solid #2a2a2a',
+            borderTop: `8px solid ${C.border}`,
           }} />
 
           {/* header */}
@@ -148,24 +160,24 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '10px 14px 8px',
-            borderBottom: fsm.role ? '1px solid #1a1a1a' : 'none',
+            borderBottom: fsm.role ? `1px solid ${C.borderDim}` : 'none',
           }}>
-            <span style={{ color: '#555', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              {fsm.role ? `${fsm.role} mode` : 'nanobot'}
+            <span style={{ color: C.textGhost, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {fsm.role ? `${fsm.role} mode` : 'echo'}
             </span>
             <button
               onClick={onClose}
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#444',
+                color: C.textGhost,
                 cursor: 'pointer',
                 fontSize: 16,
                 lineHeight: 1,
                 padding: '2px 4px',
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#aaa')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#444')}
+              onMouseEnter={e => (e.currentTarget.style.color = C.textMid)}
+              onMouseLeave={e => (e.currentTarget.style.color = C.textGhost)}
               aria-label="Close"
             >
               ×
@@ -177,7 +189,7 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
             <RoleSelect onSelect={onRoleSelect} />
           )}
 
-          {/* chat area (visitor / recruiter) */}
+          {/* chat area */}
           {fsm.role && fsm.role !== 'none' && fsm.role !== 'admin' && (
             <>
               <MessageList messages={messages} loading={loading} messagesEndRef={messagesEndRef} />
@@ -203,10 +215,9 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
             />
           )}
 
-          {/* admin authenticated */}
           {fsm.role === 'admin' && adminDone && (
             <div style={{ padding: '14px 16px' }}>
-              <p style={{ color: '#a3e635', fontSize: 13, margin: 0 }}>Admin authenticated.</p>
+              <p style={{ color: C.cherry, fontSize: 13, margin: 0 }}>Admin authenticated.</p>
             </div>
           )}
         </motion.div>
@@ -218,7 +229,7 @@ export default function ChatBubble({ fsm, onRoleSelect, onClose, displaySize }: 
 function RoleSelect({ onSelect }: { onSelect: (r: UserRole) => void }) {
   return (
     <div style={{ padding: '14px 16px' }}>
-      <p style={{ color: '#ccc', fontSize: 13, margin: '0 0 14px', lineHeight: 1.5 }}>
+      <p style={{ color: C.text, fontSize: 13, margin: '0 0 14px', lineHeight: 1.5 }}>
         Hey! Who are you?
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -233,9 +244,9 @@ function RoleSelect({ onSelect }: { onSelect: (r: UserRole) => void }) {
             onClick={() => onSelect(role)}
             style={{
               background: 'transparent',
-              border: `1px solid ${highlight ? '#a3e635' : '#333'}`,
+              border: `1px solid ${highlight ? C.cherry : C.borderDim}`,
               borderRadius: 6,
-              color: highlight ? '#a3e635' : '#ccc',
+              color: highlight ? C.text : C.textMid,
               padding: '8px 12px',
               cursor: 'pointer',
               fontFamily: 'monospace',
@@ -247,16 +258,16 @@ function RoleSelect({ onSelect }: { onSelect: (r: UserRole) => void }) {
               transition: 'border-color 0.15s, background 0.15s',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.borderColor = highlight ? '#c4f466' : '#666'
-              e.currentTarget.style.background = '#111'
+              e.currentTarget.style.borderColor = highlight ? '#a01010' : C.textGhost
+              e.currentTarget.style.background = highlight ? 'rgba(129,1,0,0.12)' : 'rgba(237,235,190,0.04)'
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.borderColor = highlight ? '#a3e635' : '#333'
+              e.currentTarget.style.borderColor = highlight ? C.cherry : C.borderDim
               e.currentTarget.style.background = 'transparent'
             }}
           >
             <span style={{ letterSpacing: '0.05em' }}>{label}</span>
-            <span style={{ color: '#444', fontSize: 10 }}>{sub}</span>
+            <span style={{ color: C.textGhost, fontSize: 10 }}>{sub}</span>
           </button>
         ))}
       </div>
@@ -293,13 +304,13 @@ function MessageList({
         >
           <div style={{
             maxWidth: '85%',
-            background: msg.role === 'user' ? '#1a1a1a' : 'transparent',
-            border: msg.role === 'user' ? '1px solid #2a2a2a' : 'none',
+            background: msg.role === 'user' ? C.bgMsg : 'transparent',
+            border: msg.role === 'user' ? `1px solid ${C.borderDim}` : 'none',
             borderRadius: 6,
             padding: msg.role === 'user' ? '6px 10px' : '0',
             fontSize: 12,
             lineHeight: 1.6,
-            color: msg.role === 'user' ? '#bbb' : '#ccc',
+            color: msg.role === 'user' ? C.textMid : C.text,
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
           }}>
@@ -316,9 +327,9 @@ function MessageList({
                 width: 5,
                 height: 5,
                 borderRadius: '50%',
-                background: '#555',
+                background: C.textGhost,
                 display: 'inline-block',
-                animation: `nanobotDot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                animation: `echoDot 1.2s ease-in-out ${i * 0.2}s infinite`,
               }}
             />
           ))}
@@ -326,7 +337,7 @@ function MessageList({
       )}
       <div ref={messagesEndRef} />
       <style>{`
-        @keyframes nanobotDot {
+        @keyframes echoDot {
           0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
           40% { opacity: 1; transform: scale(1); }
         }
@@ -351,12 +362,13 @@ function ChatInput({
   onSend: () => void
   disabled: boolean
 }) {
+  const active = value.trim() && !disabled
   return (
     <div style={{
       display: 'flex',
       gap: 6,
       padding: '8px 10px 10px',
-      borderTop: '1px solid #1a1a1a',
+      borderTop: `1px solid ${C.borderDim}`,
     }}>
       <input
         ref={inputRef}
@@ -368,10 +380,10 @@ function ChatInput({
         disabled={disabled}
         style={{
           flex: 1,
-          background: '#111',
-          border: '1px solid #2a2a2a',
+          background: C.bgInput,
+          border: `1px solid ${C.borderDim}`,
           borderRadius: 5,
-          color: '#ccc',
+          color: C.text,
           fontFamily: 'monospace',
           fontSize: 12,
           padding: '7px 10px',
@@ -381,13 +393,13 @@ function ChatInput({
       />
       <button
         onClick={onSend}
-        disabled={disabled || !value.trim()}
+        disabled={!active}
         style={{
-          background: value.trim() && !disabled ? '#a3e635' : '#1a1a1a',
+          background: active ? C.cherry : C.bgInput,
           border: 'none',
           borderRadius: 5,
-          color: value.trim() && !disabled ? '#000' : '#444',
-          cursor: value.trim() && !disabled ? 'pointer' : 'default',
+          color: active ? C.text : C.textGhost,
+          cursor: active ? 'pointer' : 'default',
           fontFamily: 'monospace',
           fontSize: 12,
           padding: '7px 12px',
@@ -416,7 +428,7 @@ function AdminGate({
 }) {
   return (
     <div style={{ padding: '14px 16px' }}>
-      <p style={{ color: '#888', fontSize: 12, margin: '0 0 10px' }}>
+      <p style={{ color: C.textMid, fontSize: 12, margin: '0 0 10px' }}>
         Enter admin password:
       </p>
       <div style={{ display: 'flex', gap: 6 }}>
@@ -429,10 +441,10 @@ function AdminGate({
           placeholder="••••••••"
           style={{
             flex: 1,
-            background: '#111',
-            border: `1px solid ${error ? '#ef4444' : '#2a2a2a'}`,
+            background: C.bgInput,
+            border: `1px solid ${error ? C.error : C.borderDim}`,
             borderRadius: 5,
-            color: '#ccc',
+            color: C.text,
             fontFamily: 'monospace',
             fontSize: 12,
             padding: '7px 10px',
@@ -443,10 +455,10 @@ function AdminGate({
         <button
           onClick={onSubmit}
           style={{
-            background: '#a3e635',
+            background: C.cherry,
             border: 'none',
             borderRadius: 5,
-            color: '#000',
+            color: C.text,
             cursor: 'pointer',
             fontFamily: 'monospace',
             fontSize: 12,
@@ -458,7 +470,7 @@ function AdminGate({
         </button>
       </div>
       {error && (
-        <p style={{ color: '#ef4444', fontSize: 11, margin: '6px 0 0' }}>Access denied.</p>
+        <p style={{ color: C.error, fontSize: 11, margin: '6px 0 0' }}>Access denied.</p>
       )}
     </div>
   )

@@ -30,8 +30,8 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: var(--color-black);
-  color: var(--color-white);
+  background: var(--color-white);
+  color: var(--color-black);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -39,8 +39,8 @@ body {
 
 /* ── SELECTION ── */
 ::selection {
-  background: var(--color-gold);
-  color: var(--color-black);
+  background: var(--color-cherry);
+  color: var(--color-white);
 }
 
 /* ── SCROLLBAR ── */
@@ -49,15 +49,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-black);
+  background: var(--color-white);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: rgba(27, 23, 22, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: var(--color-cherry);
 }
 
 /* ── TYPOGRAPHY UTILITIES ── */

@@ -1,0 +1,122 @@
+/* HeroMark — fixed brand identity element
+   Handles both the full hero name (scroll=0) and the AN monogram (scroll=end).
+   All animation is driven by JavaScript via Framer Motion MotionValues.
+   No CSS transitions here — JS owns all transforms.
+*/
+
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Zero size so it doesn't create hit targets or affect layout */
+  width: 0;
+  height: 0;
+  z-index: 9000;
+  /* The mark itself handles pointer events only in logo state */
+  pointer-events: none;
+}
+
+.mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Shrink-wrap to text — essential for correct offsetWidth measurement */
+  width: max-content;
+  /* transformOrigin: center (default) keeps entry zoom centered on screen */
+  will-change: transform, opacity;
+}
+
+/* ── Full name ─────────────────────────────────────────── */
+
+.fullName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  will-change: opacity;
+}
+
+.first {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 12vw, 85px);
+  letter-spacing: 0.3em;
+  color: var(--color-gold);
+  line-height: 1;
+  display: block;
+}
+
+.last {
+  font-family: var(--font-display);
+  font-size: clamp(46px, 9vw, 60px);
+  letter-spacing: 0.45em;
+  color: var(--color-gold-muted);
+  line-height: 1;
+  display: block;
+}
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: rgba(27, 23, 22, 0.45);
+  text-transform: uppercase;
+  margin-top: 20px;
+  display: block;
+  will-change: opacity;
+}
+
+/* Mirrors the last capital letter in each word — the font's signature move */
+.mirror {
+  display: inline-block;
+  transform: scaleX(-1);
+  letter-spacing: 0;
+}
+
+/* ── AN monogram ────────────────────────────────────────── */
+
+.monogram {
+  /* Overlays the full name at the element's top-left.
+     When the element scales to logo size, this corner becomes the corner mark. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1;
+  white-space: nowrap;
+  will-change: opacity;
+}
+
+/* A — dominant initial, Cherry Red */
+.monA {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 12vw, 85px);
+  letter-spacing: 0.08em;
+  color: var(--color-cherry);
+  line-height: 1;
+}
+
+/* N — mirrored secondary, Maroon — distinct from A but same dark-red family */
+.monN {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 12vw, 85px);
+  letter-spacing: 0;
+  color: var(--color-maroon);
+  opacity: 0.72;
+  line-height: 1;
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    will-change: auto;
+  }
+  .fullName,
+  .monogram,
+  .tagline {
+    will-change: auto;
+  }
+}

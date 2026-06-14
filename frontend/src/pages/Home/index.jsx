@@ -1,17 +1,22 @@
-import React, { Suspense, lazy } from 'react';
-import Hero from '@sections/Hero';
-import Experience from '@sections/Experience';
-import Projects from '@sections/Projects';
-import Numbers from '@sections/Numbers';
-import NanoBot from '../../nanobot/NanoBot';
+import React, { Suspense, lazy } from 'react'
+import Hero from '@sections/Hero'
+import Experience from '@sections/Experience'
+import Projects from '@sections/Projects'
+import Numbers from '@sections/Numbers'
+import HeroMark from '@components/HeroMark'
+import NanoBot from '../../nanobot/NanoBot'
 
-const AwakeningScene = lazy(() => import('@system/scenes/AwakeningScene'));
-const AskScene = lazy(() => import('@system/scenes/AskScene'));
+const AwakeningScene = lazy(() => import('@system/scenes/AwakeningScene'))
+const AskScene = lazy(() => import('@system/scenes/AskScene'))
 
 export default function HomePage() {
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="min-h-screen">
+      {/* HeroMark is position:fixed and owns the hero name + AN logo identity */}
+      <HeroMark />
+
       <Suspense fallback={null}>
+        {/* Hero is a transparent 100vh spacer that creates scroll room for HeroMark */}
         <Hero />
         <Experience />
         <Projects />
@@ -19,7 +24,8 @@ export default function HomePage() {
         <Numbers />
         <AskScene />
       </Suspense>
+
       <NanoBot />
     </div>
-  );
+  )
 }

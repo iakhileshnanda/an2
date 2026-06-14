@@ -42,35 +42,35 @@ export default function CurrentlyBuilding() {
 
   if (loading) {
     return (
-      <div className="inline-flex items-center gap-3 border border-gray-800 px-5 py-3 mb-12 animate-pulse">
-        <div className="w-2 h-2 rounded-full bg-gray-700" />
-        <div className="h-3 w-48 bg-gray-800 rounded" />
+      <div className="inline-flex items-center gap-3 border border-[#1B1716]/15 px-5 py-3 mb-12 animate-pulse">
+        <div className="w-2 h-2 rounded-full bg-[#1B1716]/15" />
+        <div className="h-3 w-48 bg-[#1B1716]/10 rounded" />
       </div>
     );
   }
 
   return (
     <motion.div
-      className="inline-flex flex-col items-start border border-gray-800 px-5 py-4 mb-12 text-left"
+      className="inline-flex flex-col items-start border border-[#1B1716]/18 px-5 py-4 mb-12 text-left"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-        <span className="font-code text-xs tracking-widest text-green-400 uppercase">
+        <span className="w-2 h-2 rounded-full bg-[#810100] animate-pulse" />
+        <span className="font-code text-xs tracking-widest text-[#810100] uppercase">
           Active Now
         </span>
       </div>
-      <p className="font-monument text-white text-sm tracking-wide mb-1">
+      <p className="font-monument text-[#1B1716] text-sm tracking-wide mb-1">
         {status.repo}
-        <span className="text-gray-600 font-code font-normal normal-case tracking-normal ml-3 text-xs">
+        <span className="text-[#1B1716]/40 font-code font-normal normal-case tracking-normal ml-3 text-xs">
           {status.ago}
         </span>
       </p>
-      <p className="font-code text-xs text-gray-500">{status.description}</p>
-      <p className="font-code text-xs text-gray-700 mt-1 truncate max-w-xs">{status.message}</p>
+      <p className="font-code text-xs text-[#1B1716]/50">{status.description}</p>
+      <p className="font-code text-xs text-[#1B1716]/32 mt-1 truncate max-w-xs">{status.message}</p>
     </motion.div>
   );
 }

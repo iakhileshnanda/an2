@@ -31,9 +31,9 @@ const FALLBACK_CELLS = buildFallbackCells(statsData);
 
 function SkeletonCell() {
   return (
-    <div className="relative border border-gray-800 bg-black p-6 md:p-8 animate-pulse">
-      <div className="h-3 w-24 bg-gray-800 rounded mb-4" />
-      <div className="h-10 w-32 bg-gray-800 rounded" />
+    <div className="relative border border-[#1B1716]/15 bg-transparent p-6 md:p-8 animate-pulse">
+      <div className="h-3 w-24 bg-[#1B1716]/10 rounded mb-4" />
+      <div className="h-10 w-32 bg-[#1B1716]/10 rounded" />
     </div>
   );
 }
@@ -79,12 +79,12 @@ function DataCell({ cell, index }) {
   }, []);
 
   return (
-    <div ref={cellRef} className="relative border border-white bg-black p-6 md:p-8">
+    <div ref={cellRef} className="relative border border-[#1B1716]/25 bg-transparent p-6 md:p-8">
       <motion.div
-        className="absolute top-0 left-0 h-[2px] bg-white"
+        className="absolute top-0 left-0 h-[2px] bg-[#810100]"
         style={{ width: topLineWidth }}
       />
-      <div className="font-code text-xs tracking-widest text-gray-500 uppercase mb-4">
+      <div className="font-code text-xs tracking-widest text-[#1B1716]/50 uppercase mb-4">
         {cell.label}
       </div>
       <div className="font-monument text-4xl md:text-5xl" style={{ color: cell.color }}>
@@ -122,16 +122,16 @@ export default function Numbers() {
     : null;
 
   return (
-    <section className="scene-section min-h-screen bg-black flex items-center py-24">
+    <section className="scene-section min-h-screen flex items-center py-24">
       <div className="max-w-6xl mx-auto px-6 w-full">
         <div className="flex items-center justify-center mb-16 gap-4">
-          <h2 className={`font-monument text-white text-center ${styles.sectionTitle}`}>
+          <h2 className={`font-monument text-[#1B1716] text-center ${styles.sectionTitle}`}>
             LIVE NOW
           </h2>
           <button
             onClick={fetchStats}
             disabled={statsLoading}
-            className="font-code text-xs tracking-widest text-gray-500 hover:text-white border border-gray-700 hover:border-white px-3 py-1 transition-colors uppercase disabled:opacity-40"
+            className="font-code text-xs tracking-widest text-[#1B1716]/50 hover:text-[#810100] border border-[#1B1716]/25 hover:border-[#810100] px-3 py-1 transition-colors uppercase disabled:opacity-40"
           >
             {statsLoading ? '...' : 'REFRESH'}
           </button>
@@ -145,7 +145,7 @@ export default function Numbers() {
         </div>
 
         {!statsLoading && timeLabel && (
-          <p className="font-code text-xs text-gray-700 text-center mt-8 tracking-widest uppercase">
+          <p className="font-code text-xs text-[#1B1716]/35 text-center mt-8 tracking-widest uppercase">
             Last updated {timeLabel}
           </p>
         )}

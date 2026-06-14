@@ -43,9 +43,9 @@ function TypingPhrase() {
   }, [displayed, phase, phraseIdx, prefersReduced]);
 
   return (
-    <p className="font-body text-base md:text-lg leading-relaxed text-gray-300 mb-8" style={{ minHeight: '5rem' }}>
+    <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/65 mb-8" style={{ minHeight: '5rem' }}>
       {displayed}
-      {!prefersReduced && <span className="cursor-blink text-green-400 ml-0.5">█</span>}
+      {!prefersReduced && <span className="cursor-blink text-[#810100] ml-0.5">█</span>}
     </p>
   );
 }
@@ -97,7 +97,7 @@ export default function Experience() {
   return (
     <section
       ref={sectionRef}
-      className="scene-section bg-black relative overflow-hidden"
+      className="scene-section relative overflow-hidden"
     >
       {/* Current year — live */}
       <div className="min-h-screen flex items-center">
@@ -114,7 +114,7 @@ export default function Experience() {
             </span>
             <div className="mt-4 flex items-center gap-2">
               <span className={styles.liveDot} />
-              <span className="font-code text-xs tracking-widest text-green-400 uppercase">
+              <span className="font-code text-xs tracking-widest text-[#810100] uppercase">
                 Live
               </span>
             </div>
@@ -129,10 +129,10 @@ export default function Experience() {
           >
             <TypingPhrase />
             <div className="flex items-baseline gap-4">
-              <span className="font-monument text-5xl md:text-7xl text-white">
+              <span className="font-monument text-5xl md:text-7xl text-[#1B1716]">
                 {dayCount.toLocaleString()}
               </span>
-              <span className="font-code text-xs tracking-widest text-gray-500 uppercase">
+              <span className="font-code text-xs tracking-widest text-[#1B1716]/50 uppercase">
                 days building
               </span>
             </div>
@@ -148,17 +148,17 @@ export default function Experience() {
           label={entry.label}
           sizeClass={styles[`year${i + 1}`]}
         >
-          <p className="font-body text-base md:text-lg leading-relaxed text-gray-300 mb-6">
+          <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/65 mb-6">
             {entry.description}
           </p>
-          <p className="font-body text-base md:text-lg leading-relaxed text-gray-500">
+          <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/40">
             {entry.detail}
           </p>
         </YearBlock>
       ))}
 
       <motion.div
-        className="absolute bottom-0 left-0 h-[1px] bg-white"
+        className="absolute bottom-0 left-0 h-[1px] bg-[#810100]"
         style={{ width: rawLineWidth }}
       />
     </section>
@@ -176,10 +176,10 @@ function YearBlock({ year, label, sizeClass, children }) {
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
         >
-          <span className={`font-monument text-white block leading-none ${sizeClass}`}>
+          <span className={`font-monument text-[#1B1716] block leading-none ${sizeClass}`}>
             {year}
           </span>
-          <div className="mt-4 font-code text-xs tracking-widest text-gray-500 uppercase">
+          <div className="mt-4 font-code text-xs tracking-widest text-[#1B1716]/45 uppercase">
             {label}
           </div>
         </motion.div>

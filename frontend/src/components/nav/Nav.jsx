@@ -1,22 +1,17 @@
-import React from 'react';
-import useStore from '@store/useStore';
-import styles from './Nav.module.css';
+import { useLocation } from 'react-router-dom'
+import styles from './Nav.module.css'
 
+// On the homepage, HeroMark (position: fixed) owns the brand identity entirely.
+// Nav only renders a logo on non-homepage routes (/admin, /human, etc.)
 export default function Nav() {
-  const { mode } = useStore();
-  const isSystem = mode === 'system';
+  const location = useLocation()
+  const isHome = location.pathname === '/'
+
+  if (isHome) return null
 
   return (
-    <nav
-      className={styles.nav}
-      style={{
-        background: isSystem ? 'transparent' : 'rgba(255,255,255,0.05)',
-        backdropFilter: isSystem ? 'none' : 'blur(10px)',
-      }}
-    >
-      <div className={`text-xs tracking-widest uppercase ${isSystem ? 'font-code text-white' : 'font-human'}`}>
-        {isSystem ? 'A.NANDA' : 'Akhilesh'}
-      </div>
+    <nav className={styles.nav}>
+      <span className={styles.logo}>AN</span>
     </nav>
-  );
+  )
 }
