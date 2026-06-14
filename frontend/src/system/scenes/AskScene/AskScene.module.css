@@ -1,0 +1,8 @@
+.title {
+  font-size: clamp(2rem, 8vw, 8rem);
+  letter-spacing: -0.04em;
+}
+
+.easterEggHint {
+  font-size: var(--text-label);
+}

@@ -1,0 +1,59 @@
+.wrapper {
+  font-family: var(--font-mono);
+}
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1f2937; /* gray-800 */
+}
+
+.dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+}
+
+.dotRed {
+  composes: dot;
+  background-color: #ef4444;
+}
+
+.dotYellow {
+  composes: dot;
+  background-color: #eab308;
+}
+
+.dotGreen {
+  composes: dot;
+  background-color: #22c55e;
+}
+
+.titleText {
+  margin-left: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #4b5563; /* gray-600 */
+}
+
+.content {
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .content {
+    padding: 1.5rem;
+  }
+}
+
+.outputText {
+  color: var(--color-green-terminal);
+}

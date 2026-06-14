@@ -1,0 +1,14 @@
+.line1 {
+  font-size: clamp(2.5rem, 10vw, 10rem);
+  letter-spacing: -0.04em;
+}
+
+.line2 {
+  font-size: clamp(2rem, 8vw, 8rem);
+  letter-spacing: -0.04em;
+}
+
+.line3 {
+  font-size: clamp(2.5rem, 10vw, 10rem);
+  letter-spacing: -0.04em;
+}

@@ -1,0 +1,44 @@
+{
+  "categories": [
+    {
+      "id": "ai-ml",
+      "label": "AI / ML",
+      "skills": [
+        { "name": "Multi-Agent Systems", "level": "expert" },
+        { "name": "LLM Integration", "level": "expert" },
+        { "name": "RAG / Vector DB", "level": "expert" },
+        { "name": "MCP Servers", "level": "expert" },
+        { "name": "Knowledge Graphs", "level": "advanced" },
+        { "name": "GraphRAG", "level": "advanced" },
+        { "name": "NVIDIA NIM", "level": "intermediate" }
+      ]
+    },
+    {
+      "id": "frontend",
+      "label": "Frontend",
+      "skills": [
+        { "name": "React", "level": "expert" },
+        { "name": "Angular 19", "level": "expert" },
+        { "name": "TypeScript", "level": "expert" },
+        { "name": "RxJS", "level": "expert" },
+        { "name": "NgRx", "level": "advanced" },
+        { "name": "Framer Motion", "level": "advanced" },
+        { "name": "D3.js", "level": "advanced" },
+        { "name": "Tailwind CSS", "level": "expert" }
+      ]
+    },
+    {
+      "id": "backend",
+      "label": "Backend / Infra",
+      "skills": [
+        { "name": "Node.js", "level": "advanced" },
+        { "name": "NestJS", "level": "advanced" },
+        { "name": "Python", "level": "advanced" },
+        { "name": "PostgreSQL", "level": "intermediate" },
+        { "name": "Neo4j", "level": "intermediate" },
+        { "name": "Puppeteer / Automation", "level": "advanced" },
+        { "name": "Nginx", "level": "intermediate" }
+      ]
+    }
+  ]
+}

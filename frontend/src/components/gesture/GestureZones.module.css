@@ -1,0 +1,137 @@
+/* GestureZones — CSS Module
+   All styles extracted from inline definitions.
+   Dynamic values (opacity, zIndex) remain as inline styles in JSX. */
+
+/* ── Shared bar typography ── */
+.barText {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+  font-weight: 500;
+}
+
+/* ── Shared zone base ── */
+.zone {
+  position: fixed;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ── System mode (dark bg): white-tinted zones ── */
+.zoneSystem {
+  background: var(--color-border-subtle);
+}
+
+/* ── Human mode (light bg): dark-tinted zones ── */
+.zoneHuman {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ── Left bar ── */
+.left {
+  left: 0;
+  top: 0;
+  width: 5cm;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.left.zoneSystem {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.left.zoneHuman {
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* ── Right bar ── */
+.right {
+  right: 0;
+  top: 0;
+  width: 5cm;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.right.zoneSystem {
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.right.zoneHuman {
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* ── Bottom bar ── */
+.bottom {
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 5cm;
+  flex-direction: row;
+}
+
+.bottom.zoneSystem {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bottom.zoneHuman {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* ── Human mode bar text: dark on light ── */
+.barTextHuman {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* ── Icon variant: reset letter-spacing ── */
+.icon {
+  letter-spacing: 0;
+}
+
+/* ── Vertical text for side bars ── */
+.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* ── Bottom label: smaller font ── */
+.bottomLabel {
+  font-size: 14px;
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  .left {
+    width: 20px;
+  }
+
+  .right {
+    width: 20px;
+  }
+
+  .bottom {
+    height: 44px;
+  }
+
+  .barText {
+    font-size: 8px;
+  }
+
+  .icon {
+    font-size: 10px;
+  }
+
+  .bottomLabel {
+    font-size: 8px;
+  }
+
+  .zone {
+    gap: 4px;
+  }
+}

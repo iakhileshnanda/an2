@@ -1,0 +1,33 @@
+.section {
+  background: var(--chapter-love-bg);
+  color: var(--chapter-love-text);
+}
+
+.watermark {
+  font-size: clamp(6rem, 20vw, 22rem);
+  color: var(--chapter-love-accent);
+  opacity: 0.08;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 10rem);
+  color: var(--chapter-love-text);
+}
+
+.divider {
+  background: var(--chapter-love-accent);
+}
+
+.reserveText {
+  opacity: 0.7;
+}
+
+.japaneseText {
+  color: var(--chapter-love-accent);
+  opacity: 0.4;
+}
+
+.translationText {
+  color: var(--chapter-love-accent);
+  opacity: 0.4;
+}

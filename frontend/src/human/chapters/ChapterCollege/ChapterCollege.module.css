@@ -1,0 +1,38 @@
+.section {
+  background: var(--chapter-college-bg);
+  color: var(--chapter-college-text);
+}
+
+.watermark {
+  font-size: clamp(6rem, 20vw, 22rem);
+  color: var(--chapter-college-accent);
+  opacity: 0.1;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 10rem);
+  color: var(--chapter-college-text);
+}
+
+.divider {
+  background: var(--chapter-college-accent);
+}
+
+.photoPlaceholder {
+  background: linear-gradient(135deg, rgba(21, 101, 192, 0.15), rgba(21, 101, 192, 0.05));
+}
+
+.memoryLabel {
+  color: var(--chapter-college-accent);
+  opacity: 0.3;
+}
+
+.japaneseText {
+  color: var(--chapter-college-accent);
+  opacity: 0.5;
+}
+
+.translationText {
+  color: var(--chapter-college-accent);
+  opacity: 0.4;
+}

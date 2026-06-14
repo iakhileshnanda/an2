@@ -1,0 +1,8 @@
+node_modules/
+frontend/dist/
+frontend/node_modules/
+server/portfolio-api/node_modules/
+.env
+*.DS_Store
+.DS_Store
+dist/

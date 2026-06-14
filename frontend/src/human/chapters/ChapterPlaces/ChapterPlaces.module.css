@@ -1,0 +1,49 @@
+.section {
+  background: var(--chapter-places-bg);
+  color: var(--chapter-places-text);
+}
+
+.watermark {
+  font-size: clamp(6rem, 20vw, 22rem);
+  color: var(--chapter-places-accent);
+  opacity: 0.1;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 10rem);
+  color: var(--chapter-places-text);
+}
+
+.divider {
+  background: var(--chapter-places-accent);
+}
+
+.mapContainer {
+  background: rgba(46, 125, 50, 0.08);
+}
+
+.mapSvg {
+  opacity: 0.15;
+}
+
+.pinDot {
+  background: var(--chapter-places-accent);
+}
+
+.pinLine {
+  background: var(--chapter-places-accent);
+}
+
+.pinLabel {
+  color: var(--chapter-places-accent);
+}
+
+.japaneseText {
+  color: var(--chapter-places-accent);
+  opacity: 0.5;
+}
+
+.translationText {
+  color: var(--chapter-places-accent);
+  opacity: 0.4;
+}

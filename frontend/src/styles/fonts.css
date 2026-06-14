@@ -1,0 +1,14 @@
+/* ============================================================
+   FONT DECLARATIONS — A.NANDA PORTFOLIO
+   ============================================================
+   @font-face rules only. No utility classes here.
+   Google Fonts are loaded via URL import.
+   Local fonts are loaded via @font-face.
+   ============================================================ */
+
+@font-face {
+  font-family: 'PastorOfMuppets';
+  src: url('../assets/fonts/Pastor_of_Muppets.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

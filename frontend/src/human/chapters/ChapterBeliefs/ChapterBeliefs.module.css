@@ -1,0 +1,34 @@
+.section {
+  background: var(--chapter-beliefs-bg);
+  color: var(--chapter-beliefs-text);
+}
+
+.watermark {
+  font-size: clamp(6rem, 20vw, 22rem);
+  color: var(--chapter-beliefs-accent);
+  opacity: 0.08;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 10rem);
+  color: var(--chapter-beliefs-text);
+}
+
+.divider {
+  background: var(--chapter-beliefs-accent);
+}
+
+.beliefBold {
+  font-weight: 600;
+  color: var(--chapter-beliefs-accent);
+}
+
+.japaneseText {
+  color: var(--chapter-beliefs-accent);
+  opacity: 0.5;
+}
+
+.translationText {
+  color: var(--chapter-beliefs-accent);
+  opacity: 0.4;
+}

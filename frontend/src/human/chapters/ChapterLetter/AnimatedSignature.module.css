@@ -1,0 +1,10 @@
+.wrapper {
+  width: 145px;
+  margin: 8px 0 24px 0;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}

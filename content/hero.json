@@ -1,0 +1,22 @@
+{
+  "name": {
+    "first": "Akhilesh",
+    "last": "Nanda",
+    "display": "AkhilesH NandA"
+  },
+  "roles": [
+    "Frontend Lead",
+    "AI Builder"
+  ],
+  "location": "Bangalore",
+  "tagline": "Frontend Lead · AI Builder · Bangalore",
+  "status": {
+    "label": "Open to work",
+    "available": true
+  },
+  "headline": "Building AI systems that think.",
+  "subheadline": "Multi-agent simulations. Knowledge graphs. Autonomous tools.",
+  "codeStart": "2019-01-01",
+  "siteUrl": "https://akhileshnanda.maya-ai.dev",
+  "githubUser": "iakhileshnanda"
+}

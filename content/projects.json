@@ -1,0 +1,62 @@
+[
+  {
+    "id": "maya-miro",
+    "name": "MAYA MIRO",
+    "company": "Multi-Agent Simulation Engine",
+    "description": "Parallel world simulation where hundreds of AI investor personas debate on simulated social media to predict market sentiment. Upload an earnings report — watch the crowd react before you trade.",
+    "tags": ["Python", "Neo4j", "NVIDIA NIM", "Qwen 397B", "GraphRAG", "CAMEL-OASIS"],
+    "link": "https://github.com/iakhileshnanda/myMayaMIRO",
+    "featured": true,
+    "status": "active"
+  },
+  {
+    "id": "oracle",
+    "name": "ORACLE",
+    "company": "Personal Project",
+    "description": "AI job-hunting agent that scrapes, matches, and applies autonomously.",
+    "tags": ["Node.js", "MCP", "AI Agents", "Puppeteer"],
+    "link": null,
+    "featured": true,
+    "status": "active"
+  },
+  {
+    "id": "nanobot",
+    "name": "NANOBOT",
+    "company": "Portfolio AI",
+    "description": "Personal AI assistant trained on my life, skills, and philosophy.",
+    "tags": ["LLM", "RAG", "NestJS", "Vector DB"],
+    "link": null,
+    "featured": true,
+    "status": "building"
+  },
+  {
+    "id": "portal",
+    "name": "PORTAL",
+    "company": "Enterprise",
+    "description": "Full-stack Angular 19 dashboard with real-time data visualization.",
+    "tags": ["Angular 19", "RxJS", "D3.js", "NgRx"],
+    "link": null,
+    "featured": false,
+    "status": "shipped"
+  },
+  {
+    "id": "forge",
+    "name": "FORGE",
+    "company": "Platform",
+    "description": "MCP server toolkit — 6 tools for AI agent orchestration.",
+    "tags": ["MCP", "TypeScript", "SDK", "API Design"],
+    "link": null,
+    "featured": false,
+    "status": "active"
+  },
+  {
+    "id": "atlas",
+    "name": "ATLAS",
+    "company": "Data Systems",
+    "description": "Knowledge base system with intelligent search and retrieval.",
+    "tags": ["Search", "NLP", "PostgreSQL", "Full-Text"],
+    "link": null,
+    "featured": false,
+    "status": "active"
+  }
+]

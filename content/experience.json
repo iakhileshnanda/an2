@@ -1,0 +1,53 @@
+[
+  {
+    "year": "2024",
+    "label": "The shift",
+    "title": "AI Systems Builder",
+    "company": "Independent",
+    "description": "Stopped building for others. Started building for the problem. AI agents, graph databases, simulation engines — the stack changed because the questions changed.",
+    "detail": "First multi-agent system. First knowledge graph. First time the code felt smarter than me.",
+    "highlights": [
+      "Built Maya MIRO — multi-agent market simulation",
+      "Designed MCP server toolkit (FORGE)",
+      "Started NanoBot — personal AI trained on context"
+    ]
+  },
+  {
+    "year": "2021",
+    "label": "Full-stack",
+    "title": "Frontend Lead",
+    "company": "Enterprise (ValueLabs)",
+    "description": "Angular, RxJS, NgRx, real-time dashboards — enterprise-scale frontends that actually shipped. Learned what production means when thousands of users depend on your code daily.",
+    "detail": "Became the person they called when the UI broke at 2 AM.",
+    "highlights": [
+      "Led frontend for enterprise Angular 19 dashboards",
+      "Real-time data visualization with D3.js",
+      "Mentored junior developers"
+    ]
+  },
+  {
+    "year": "2019",
+    "label": "First line of code",
+    "title": "Junior Developer",
+    "company": "ValueLabs",
+    "description": "Walked into ValueLabs with zero programming background. A mechanical engineer who'd spent the last year inspecting factory floors — now staring at a code editor for the first time.",
+    "detail": "No CS degree. No bootcamp. Just stayed up every night until the screen started making sense.",
+    "highlights": [
+      "Self-taught programming while working full-time",
+      "First production frontend shipped within 6 months"
+    ]
+  },
+  {
+    "year": "2018",
+    "label": "The other life",
+    "title": "Quality Control Inspector",
+    "company": "Omni Matrix",
+    "description": "Reading engineering drawings, measuring tolerances, walking production lines. CATIA, ANSYS, steel plants, Go-Karts — a mechanical engineer doing exactly what was expected.",
+    "detail": "Until it wasn't enough.",
+    "highlights": [
+      "Mechanical engineering background",
+      "CATIA, ANSYS proficiency",
+      "Factory floor quality assurance"
+    ]
+  }
+]

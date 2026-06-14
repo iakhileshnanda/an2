@@ -1,0 +1,28 @@
+{
+  "headline": "LET'S BUILD SOMETHING THAT MATTERS.",
+  "subheadline": "「大切なものを、一緒に作ろう」",
+  "cta": {
+    "primary": {
+      "label": "Ask Maya",
+      "action": "open-maya"
+    },
+    "secondary": {
+      "label": "Email",
+      "href": "mailto:theakhilesh.m@gmail.com"
+    }
+  },
+  "social": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/iakhileshnanda",
+      "icon": "github"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/akhileshnanda",
+      "icon": "linkedin"
+    }
+  ],
+  "availability": "Open to senior frontend, AI engineering, and founding-team roles.",
+  "easterEgg": "type system.human to unlock the other side"
+}

@@ -1,0 +1,111 @@
+/* ============================================================
+   DESIGN TOKENS — A.NANDA PORTFOLIO
+   ============================================================
+   Single source of truth for all visual decisions.
+   Every component must reference these variables.
+   Never hardcode colors, fonts, or spacing in components.
+   ============================================================ */
+
+:root {
+  /* ── COLORS ── */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gold: #c8a96e;
+  --color-gold-muted: #3a3a3a;
+  --color-green-terminal: #00FF41;
+  --color-red-terminal: #FF3333;
+  --color-red-warning: rgba(255, 50, 50, 0.3);
+  --color-surface-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-dim: rgba(255, 255, 255, 0.06);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.5);
+  --color-text-tertiary: rgba(255, 255, 255, 0.3);
+  --color-text-dim: rgba(255, 255, 255, 0.15);
+  --color-text-ghost: rgba(255, 255, 255, 0.08);
+
+  /* ── HUMAN MODE CHAPTER COLORS ── */
+  --chapter-child-bg: #FFF3E0;
+  --chapter-child-accent: #FF6B35;
+  --chapter-child-text: #1A0A00;
+  --chapter-college-bg: #E8F4FD;
+  --chapter-college-accent: #1565C0;
+  --chapter-college-text: #0A1628;
+  --chapter-love-bg: #FCE4EC;
+  --chapter-love-accent: #C2185B;
+  --chapter-love-text: #1A0010;
+  --chapter-places-bg: #E8F5E9;
+  --chapter-places-accent: #2E7D32;
+  --chapter-places-text: #001A00;
+  --chapter-music-bg: #F3E5F5;
+  --chapter-music-accent: #7B1FA2;
+  --chapter-music-text: #1A0028;
+  --chapter-beliefs-bg: #FFF8E1;
+  --chapter-beliefs-accent: #E65100;
+  --chapter-beliefs-text: #1A0800;
+  --chapter-letter-bg: #FAFAFA;
+  --chapter-letter-accent: #5D4037;
+  --chapter-letter-text: #1C1008;
+
+  /* ── TYPOGRAPHY ── */
+  /* Change fonts here — every component reads from these tokens */
+  --font-display: 'PastorOfMuppets', serif;          /* Hero section only (custom TTF) */
+  --font-heading: 'Spectral', serif;                 /* Scene headings, titles */
+  --font-body: 'Spectral', serif;                    /* Body text, descriptions */
+  --font-hover: 'Potta One', cursive;               /* Playful glimpse on hover */
+  --font-mono: 'JetBrains Mono', monospace;          /* Terminal, code, labels, tags */
+  --font-editorial: 'Cormorant Garamond', serif;     /* Human mode chapters */
+  --font-system: 'Spectral', serif;                  /* Legacy alias — same as heading */
+
+  /* ── FONT SIZES ── */
+  --text-hero: clamp(32px, 5vw, 56px);
+  --text-hero-last: clamp(26px, 4vw, 46px);
+  --text-scene-xl: clamp(48px, 10vw, 120px);
+  --text-scene-lg: clamp(32px, 6vw, 80px);
+  --text-tagline: 9px;
+  --text-label: 10px;
+  --text-body: 14px;
+  --text-terminal: 15px;
+  --text-terminal-input: 18px;
+  --text-ui: 11px;
+
+  /* ── LETTER SPACING ── */
+  --tracking-hero: 0.3em;
+  --tracking-hero-last: 0.45em;
+  --tracking-label: 3px;
+  --tracking-wide: 4px;
+  --tracking-wider: 5px;
+  --tracking-widest: 6px;
+
+  /* ── SPACING ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-section: 100vh;
+
+  /* ── GESTURE ZONE ── */
+  --zone-bar-width: 32px;
+  --zone-bar-height: 32px;
+  --zone-transition: opacity 0.3s ease;
+  --zone-bg: rgba(255, 255, 255, 0.04);
+  --zone-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* ── Z-INDEX SCALE ── */
+  --z-base: 1;
+  --z-content: 10;
+  --z-overlay: 100;
+  --z-gesture: 9999;
+  --z-terminal: 99999;
+
+  /* ── ANIMATION ── */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --duration-scene: 1000ms;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}

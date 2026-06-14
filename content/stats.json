@@ -1,0 +1,55 @@
+{
+  "description": "These are fallback values shown when /api/stats is unavailable. The live endpoint at /api/stats returns the same shape and overrides these at runtime.",
+  "cells": [
+    {
+      "id": "oracle-uptime",
+      "label": "ORACLE UPTIME",
+      "value": 99.9,
+      "suffix": "%",
+      "color": "#00FF41",
+      "apiKey": "oracleUptime"
+    },
+    {
+      "id": "nanobot-status",
+      "label": "NANOBOT STATUS",
+      "value": null,
+      "text": "ONLINE",
+      "suffix": null,
+      "color": "#00FF41",
+      "apiKey": "nanobotStatus"
+    },
+    {
+      "id": "jobs-scraped",
+      "label": "JOBS SCRAPED",
+      "value": 47,
+      "suffix": "",
+      "color": "#FFFFFF",
+      "apiKey": "jobsScraped"
+    },
+    {
+      "id": "best-match",
+      "label": "BEST MATCH",
+      "value": 91,
+      "suffix": "%",
+      "color": "#FFFFFF",
+      "apiKey": "bestMatch"
+    },
+    {
+      "id": "mcp-tools",
+      "label": "MCP TOOLS",
+      "value": 6,
+      "suffix": "",
+      "color": "#FFFFFF",
+      "apiKey": "mcpTools"
+    },
+    {
+      "id": "angular",
+      "label": "ANGULAR",
+      "value": null,
+      "text": "v19",
+      "suffix": null,
+      "color": "#FFFFFF",
+      "apiKey": "angularVersion"
+    }
+  ]
+}

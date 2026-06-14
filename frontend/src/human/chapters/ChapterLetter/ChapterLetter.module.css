@@ -1,0 +1,38 @@
+.section {
+  background: var(--chapter-letter-bg);
+  color: var(--chapter-letter-text);
+}
+
+.watermark {
+  font-size: clamp(6rem, 20vw, 22rem);
+  color: var(--chapter-letter-accent);
+  opacity: 0.06;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 10rem);
+  color: var(--chapter-letter-text);
+}
+
+.divider {
+  background: var(--chapter-letter-accent);
+}
+
+.letterBody {
+  border-color: rgba(93, 64, 55, 0.2);
+}
+
+.signatureName {
+  color: var(--chapter-letter-accent);
+  opacity: 0.6;
+}
+
+.japaneseText {
+  color: var(--chapter-letter-accent);
+  opacity: 0.4;
+}
+
+.translationText {
+  color: var(--chapter-letter-accent);
+  opacity: 0.4;
+}
