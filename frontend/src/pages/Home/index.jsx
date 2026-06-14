@@ -3,6 +3,7 @@ import Hero from '@sections/Hero';
 import Experience from '@sections/Experience';
 import Projects from '@sections/Projects';
 import Numbers from '@sections/Numbers';
+import NanoBot from '../../nanobot/NanoBot';
 
 const AwakeningScene = lazy(() => import('@system/scenes/AwakeningScene'));
 const AskScene = lazy(() => import('@system/scenes/AskScene'));
@@ -18,6 +19,7 @@ export default function HomePage() {
         <Numbers />
         <AskScene />
       </Suspense>
+      <NanoBot />
     </div>
   );
 }
