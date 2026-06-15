@@ -1,0 +1,112 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+}
+
+/* ── P5 accent char ──────────────────────────────────── */
+/* One character in a label gets a reversed colour block —
+   this is the core Persona 5 irregular-title treatment   */
+.acc {
+  display: inline-block;
+  background: #810100;
+  color: #EDEBDE;
+  padding: 0 2.5px;
+  font-size: 1.12em;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* ── "WH[O] R U" section header ────────────────────── */
+.p5Head {
+  margin: 0 0 3px 0;
+  padding-left: 5%;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(27,23,22,0.42);
+  letter-spacing: 0.18em;
+}
+
+/* ── Intent arrow glyph ────────────────────────────── */
+.arrow {
+  color: #810100;
+  font-size: 8px;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+
+/* ── "just roaming" link ────────────────────────────── */
+.roamLink {
+  display: block;
+  margin-top: 4px;
+  margin-left: 8%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 12px;
+  color: rgba(27,23,22,0.26);
+  letter-spacing: 0.06em;
+  text-align: left;
+  transition: color 0.14s;
+  padding: 0;
+}
+.roamLink:hover { color: rgba(27,23,22,0.55); }
+
+/* ── Chat field labels ──────────────────────────────── */
+.echoIcon {
+  color: #810100;
+  font-size: 8px;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+.youLabel {
+  font-size: 9px;
+  color: rgba(237,235,222,0.38);
+  margin-right: 7px;
+  letter-spacing: 0.07em;
+}
+
+/* ── Thinking dots ──────────────────────────────────── */
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(237,235,222,0.4);
+}
+.dot:nth-child(1) { animation: blink 1.2s ease-in-out 0.0s infinite; }
+.dot:nth-child(2) { animation: blink 1.2s ease-in-out 0.2s infinite; }
+.dot:nth-child(3) { animation: blink 1.2s ease-in-out 0.4s infinite; }
+
+/* ── Close button (P5 mono label, not just "×") ─────── */
+.closeBtn {
+  position: absolute;
+  top: -18px;
+  right: 0;
+  background: none;
+  border: none;
+  color: rgba(27,23,22,0.28);
+  cursor: pointer;
+  font-size: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 4px;
+  transition: color 0.1s;
+  z-index: 10;
+}
+.closeBtn:hover { color: #1B1716; }
+
+/* ── Keyframes ──────────────────────────────────────── */
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40%            { opacity: 1;   transform: scale(1);   }
+}

@@ -1,440 +1,231 @@
-# NanoBot — System Architecture
-
-> Status: Design only — not implemented  
-> Replaces: AiTerminal, GestureZones, all previous AI interaction concepts  
-> NanoBot IS the portfolio interface. Everything flows through it.
+# Echo — Droid Architecture
+_Last updated: 2026-06-15_
 
 ---
 
-## 1. System Architecture
+## What Echo Is
 
-### Overview
-
-NanoBot is a pixel-art droid that roams the portfolio viewport. It is always visible. It is the only way to interact with AI on the portfolio. There is no AI terminal, no separate chat widget, no FAQ section.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      BROWSER                                │
-│                                                             │
-│  ┌──────────────────┐      ┌──────────────────────────────┐ │
-│  │  Portfolio Page  │      │         NanoBot              │ │
-│  │  (sections)      │      │  ┌──────────────────────┐    │ │
-│  │                  │      │  │  Roaming Sprite      │    │ │
-│  │  Hero            │      │  │  (always visible)    │    │ │
-│  │  Experience      │      │  └──────────────────────┘    │ │
-│  │  Projects        │      │  ┌──────────────────────┐    │ │
-│  │  Numbers         │      │  │  Chat Bubble         │    │ │
-│  │  Contact         │      │  │  (on click)          │    │ │
-│  │                  │      │  └──────────────────────┘    │ │
-│  └──────────────────┘      │  ┌──────────────────────┐    │ │
-│                             │  │  Mode: visitor       │    │ │
-│                             │  │       recruiter      │    │ │
-│                             │  │       admin          │    │ │
-│                             │  └──────────────────────┘    │ │
-│                             └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-          │  POST /api/maya  │  POST /api/admin/*
-          ▼                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      SERVER (Oracle VPS)                     │
-│                                                             │
-│  ┌─────────────────┐    ┌──────────────────────────────┐   │
-│  │  Maya API       │    │  Admin API                   │   │
-│  │  /api/maya      │    │  /api/admin/login             │   │
-│  │                 │    │  /api/admin/content/:section  │   │
-│  │  Groq LLM       │    │  /api/admin/deploy            │   │
-│  │  Mode-aware     │    │                              │   │
-│  │  prompts        │    │  Writes content/*.json       │   │
-│  └─────────────────┘    │  Runs git commit + push      │   │
-│                          │  Rebuilds frontend           │   │
-│                          └──────────────────────────────┘   │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  content/                                           │   │
-│  │  ├── hero.json                                      │   │
-│  │  ├── projects.json                                  │   │
-│  │  ├── experience.json                                │   │
-│  │  ├── stats.json                                     │   │
-│  │  └── contact.json                                   │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-          │  git push origin main
-          ▼
-┌─────────────────────────┐
-│  GitHub (backup + log)  │
-└─────────────────────────┘
-```
-
-### Key Principle: One Surface
-
-NanoBot is the only entry point for:
-- Questions about Akhilesh
-- Recruiter interactions
-- Admin content editing
-
-There is no other chat, no terminal, no contact form that competes with it.
+Echo is a pixel-art droid that lives on the portfolio. She roams the viewport autonomously, reacts to clicks, and serves as the only conversational surface on the site. She is not a chat widget. She is not a support bot. She is a tiny pixel companion with a personality.
 
 ---
 
-## 2. Content Architecture
-
-Content lives in `newakhilesh/content/`. Portfolio sections render from these files. No section has hardcoded copy.
-
-### Files
+## Files
 
 ```
-content/
-├── hero.json        — name, tagline, status, headline, availability
-├── projects.json    — project list with tags, status, links
-├── experience.json  — career timeline entries
-├── skills.json      — skill categories and levels
-├── stats.json       — dashboard cells (fallback values + API key mapping)
-└── contact.json     — CTAs, social links, availability text
+frontend/src/nanobot/
+├── NanoBot.tsx          — root component, mounts Echo as a fixed overlay
+├── NanoBotFSM.ts        — finite state machine (all state logic lives here)
+├── useNanoBot.ts        — hook: FSM wiring, roaming, clicks, scroll hints, idle hints
+├── EchoBubble.tsx       — Pokémon/Animal Crossing style conversation UI
+├── EchoBubble.module.css — pixel border styling, menu, response, tail
+├── SpriteAnimator.tsx   — canvas sprite sheet renderer
+├── types.ts             — BotState, UserRole, ANIMATIONS map
+└── sprites/             — droid_00.png sprite sheet + source .aseprite
 ```
 
-### Rendering Model
+---
 
-Each portfolio section receives its data as a prop. The section component is pure — it renders what it receives.
+## FSM States
+
+| State      | What Echo looks like         | When it happens                          |
+|------------|------------------------------|------------------------------------------|
+| `ROAMING`  | Walking animation (row 1)    | Default — moves around the bottom bar   |
+| `IDLE`     | Idle loop (row 0)            | Random pause between roams               |
+| `SLEEPING` | Doze loop (row 3)            | Random — she falls asleep mid-roam       |
+| `JUMPING`  | Jump arc (row 2)             | Double-click, or random chance from roam |
+| `SQUISH`   | Squish on landing (row 5)    | 50% chance after a jump                 |
+| `TALKING`  | Talking animation (row 4)    | Any click that opens the bubble          |
+| `THINKING` | Same row as TALKING, 7fps    | Message sent, waiting for API response   |
+| `LEAVING`  | Walk-off animation (row 6)   | Bubble closed — she exits the screen     |
+
+### Transitions
 
 ```
-App bootstrap:
-  fetch('content/hero.json') → <Hero data={hero} />
-  fetch('content/projects.json') → <Projects data={projects} />
-  fetch('content/experience.json') → <Experience data={experience} />
+ROAMING / IDLE / SLEEPING
+  ├── single click      → TALKING (role = null, shows main menu)
+  ├── double click      → JUMPING (jumpReason = 'click')
+  └── triple click      → TALKING (role = 'admin', shows admin placeholder)
+
+JUMPING
+  ├── ANIM_DONE + jumpReason='click'  → TALKING (role = 'visitor', skips menu)
+  └── ANIM_DONE + jumpReason='roam'  → SQUISH (50%) or back to prev state
+
+SQUISH
+  └── ANIM_DONE → IDLE
+
+TALKING
+  ├── MESSAGE_SENT → THINKING
+  └── CLOSE        → LEAVING
+
+THINKING
+  ├── REPLY_RECEIVED → TALKING
+  └── CLOSE          → LEAVING
+
+LEAVING
+  └── LEAVE_DONE → ROAMING (resets position)
+```
+
+---
+
+## Click Interactions
+
+All three click types are detected inside a **350ms accumulation window** in `useNanoBot.ts`. Clicks are counted and resolved once the window closes.
+
+| Interaction   | Behaviour                                                      |
+|---------------|----------------------------------------------------------------|
+| Single click  | Opens bubble → main menu ("What would you like to know?")     |
+| Double click  | Echo jumps → lands → bubble opens directly in visitor topics  |
+| Triple click  | Opens bubble with admin placeholder ("Admin mode coming soon") |
+
+---
+
+## Conversation UI — EchoBubble
+
+Styled after Pokémon dialogue boxes and Animal Crossing speech bubbles. Not a chat widget.
+
+### Views
+
+**Main menu** (single click):
+```
+╔══════════════════════════╗
+║ ECHO                   × ║
+╠══════════════════════════╣
+  What would you like to
+  know?
+══════════════════════════
+  ► How are you?
+    About Akhilesh
+    Projects
+    AI Experience
+    Leadership
+    Recruiter Mode       →
+```
+
+**Recruiter submenu** (select "Recruiter Mode"):
+```
+╔══════════════════════════╗
+║ RECRUITER MODE         × ║
+╠══════════════════════════╣
+  What are you hiring for?
+══════════════════════════
+  ► Wing-Man
+    Team Leadership
+    AI Experience
+    Resume
+◄ Back
+```
+
+**Response view** (after selecting any topic):
+```
+╔══════════════════════════╗
+║ Projects               × ║
+╠══════════════════════════╣
+══════════════════════════
+  Wing-Man — AI interview
+  coach.
+  Maya MIRO — 500-agent
+  market sim.
   ...
+══════════════════════════
+◄ Back
 ```
 
-**Why static files served by nginx, not an API:**
-- Content files are committed to the repo and served as static assets
-- No database. No CMS. No API needed to read them.
-- After admin edits and deploy, the new files are on disk and nginx serves them immediately.
-
-### Update Cycle
-
+**Admin placeholder** (triple click):
 ```
-Admin edits via NanoBot
-    ↓
-Server writes content/<file>.json to disk
-    ↓
-Server runs: npm run build (builds React app with new JSON)
-    ↓
-nginx serves new build
-    ↓
-Visitor sees updated content on next page load
+╔══════════════════════════╗
+║ ADMIN                  × ║
+╠══════════════════════════╣
+══════════════════════════
+  Restricted access
+  Admin mode coming soon.
+══════════════════════════
+◄ Close
 ```
 
-Changes take effect within ~30 seconds of admin approval (build time).
+### Keyboard Navigation
+
+| Key         | Action                           |
+|-------------|----------------------------------|
+| ↑ / ↓       | Move `►` cursor through menu     |
+| Enter       | Select highlighted item          |
+| Escape      | Go back one level / close        |
+| Backspace   | Go back (response view only)     |
+
+### Current Responses (hardcoded — pre-API)
+
+| Key           | Menu location       | Topic                          |
+|---------------|---------------------|--------------------------------|
+| `how_are_you` | Main                | Personality intro              |
+| `about`       | Main                | Who Akhilesh is                |
+| `projects`    | Main                | Wing-Man, Maya MIRO, Oracle    |
+| `ai`          | Main                | AI/LLM production experience  |
+| `leadership`  | Main                | Team lead at Trustt            |
+| `wingman`     | Recruiter           | Wing-Man deep dive             |
+| `team_lead`   | Recruiter           | Leadership details             |
+| `ai_rec`      | Recruiter           | AI for recruiters              |
+| `resume`      | Recruiter           | Contact + availability         |
 
 ---
 
-## 3. NanoBot Modes
+## Proactive Hints
 
-NanoBot operates in one of three modes. The mode determines:
-- What system prompt Maya receives
-- What UI the chat bubble shows
-- What actions NanoBot can take
+When Echo has been idle for **60 seconds** and no bubble is open, she shows a small dark tooltip above her head. It auto-dismisses after 5 seconds.
 
-### Mode Detection
+Hints are **section-aware** via IntersectionObserver on `#hero`, `#experience`, `#projects`, `#numbers`:
 
-```
-Initial state: VISITOR
-    ↓
-User opens chat
-    ↓
-NanoBot shows role selector:
-  [  General  ]  [  Recruiter  ]  [  Admin  ]
-    ↓
-User picks → mode is set for the session
-Admin → shows password prompt before activating
-```
-
-Mode persists for the browser session. Refreshing resets to VISITOR.
+| Section      | Example hints                                      |
+|--------------|----------------------------------------------------|
+| `#hero`      | "psst. ask me something." / "i know things about this guy." |
+| `#experience`| "7 years of work. ask me to break it down."        |
+| `#projects`  | "any of these catch your eye?"                     |
+| `#numbers`   | "the stats update live. ask me what they mean."    |
 
 ---
 
-### 3a. Visitor Mode
+## Roaming Behaviour
 
-**Goal:** Short discovery conversations. Answer questions, not long monologues.
-
-**NanoBot behavior:**
-- Answers questions about Akhilesh, projects, skills, experience
-- Keeps responses short (3–5 sentences max)
-- Offers to switch to Recruiter mode if the visitor seems professional
-
-**System prompt context includes:**
-- Contents of all `content/*.json` files
-- `about-me.md` (existing file in repo root)
-
-**Example flow:**
-```
-Visitor: What does Akhilesh build?
-NanoBot: AI systems that actually work in production. Multi-agent
-         simulations (Maya MIRO), autonomous job agents (Oracle),
-         and enterprise Angular dashboards. Currently building
-         NanoBot — you're talking to it.
-```
+- Constrained to the **center 60%** of the viewport width (avoids corners)
+- Pinned to the **bottom** of the viewport
+- Movement speed: `slow` (3.5s), `normal` (2.0s), `fast` (0.9s) — chosen randomly
+- Roam tick fires every **3–8 seconds**
+- On each tick: 50% roam, 20% idle, 15% sleep, 10% jump, 5% squish
 
 ---
 
-### 3b. Recruiter Mode
+## Sprite Sheet
 
-**Goal:** Convert interest into contact. Every conversation ends with an action.
+File: `frontend/src/nanobot/sprites/droid_00.png`  
+Dimensions: 608 × 224px  
+Frame size: 32 × 32px  
+Grid: 19 columns × 7 rows
 
-**NanoBot behavior:**
-- Focuses on hiring value proposition
-- Answers: skills, experience, availability, salary, leadership, AI work
-- Always closes with contact options: resume, LinkedIn, email
-- Never just says "good luck" — always gives a next step
+| Row | State    | Frames | FPS |
+|-----|----------|--------|-----|
+| 0   | IDLE     | 12     | 10  |
+| 1   | ROAMING  | 7      | 10  |
+| 2   | JUMPING  | 8      | 12  |
+| 3   | SLEEPING | 6      | 6   |
+| 4   | TALKING  | 19     | 12  |
+| 4   | THINKING | 19     | 7   |
+| 5   | SQUISH   | 8      | 14  |
+| 6   | LEAVING  | 12     | 10  |
 
-**System prompt context includes:**
-- All `content/*.json` files
-- A recruiter-specific instruction: "You are a professional representative. Speak confidently about Akhilesh's value. Never be vague about availability or experience. Always end with contact options."
-- `VITE_RESUME_URL` — if the message mentions resume, open the URL
-
-**End-of-conversation pattern:**
-```
-After any substantive recruiter exchange, NanoBot automatically appends:
-
-"Want to take next steps?
-  → Resume: [link]
-  → LinkedIn: [link]  
-  → Email: theakhilesh.m@gmail.com"
-```
-
-**Lead capture:**
-When a recruiter shows strong interest (Maya detects via `%%LEAD%%` markers, same pattern already in AiTerminal), silently POST to `/api/contact` with name/company/intent if available.
+THINKING reuses row 4 at a lower FPS to signal "processing" without a separate sprite row.
 
 ---
 
-### 3c. Admin Mode
-
-**Goal:** Let Akhilesh update portfolio content through conversation.
-
-**Authentication:** Admin selects Admin mode → NanoBot shows password prompt inline in the chat bubble → password POSTed to `/api/admin/login` → returns JWT → stored in sessionStorage.
-
-**NanoBot behavior in admin mode:**
-- Knows the current content of each `content/*.json` file (server provides it)
-- Understands natural language edit requests
-- Always proposes the change before applying it
-- Never modifies anything without explicit approval ("yes" / "apply" / "do it")
-- Reports success or failure after each operation
-
-**Admin capabilities:**
-- Read current content of any section
-- Propose edits to any field in `content/*.json`
-- Apply approved changes (write file + rebuild + push)
-- Ask "what changed recently" (git log on content/ files)
-
-**Admin constraints (hard limits, enforced server-side):**
-- Can ONLY write to `content/*.json`
-- Cannot touch any `.jsx`, `.tsx`, `.js` (non-content), `.css`, `.sh`, `.json` outside `content/`
-- Server path validation: reject any write path that does not match `content/<allowed-section>.json`
-
----
-
-## 4. GitHub Workflow
-
-### Purpose
-
-Git history is the audit log for content changes. Every NanoBot edit is a commit.
-
-### Flow
-
-```
-Admin approves change in NanoBot chat
-    ↓
-Server:
-  1. Validate JSON schema for the section
-  2. Write to content/<section>.json (atomic: write tmp → rename)
-  3. npm run build  (rebuild frontend with new content)
-  4. Move build output to nginx serve directory
-  5. git -C <repo_root> add content/<section>.json
-  6. git -C <repo_root> commit -m "content(<section>): <description> [nanobot]"
-  7. git -C <repo_root> push origin main
-    ↓
-GitHub receives push
-  → Backup/history preserved
-  → No CI/CD triggered (build already happened in step 3)
-```
-
-### Why Build Before Push
-
-Build happens on the server immediately (step 3), not triggered by the GitHub push. This means:
-
-- Visitors see the change in ~30 seconds (local build time)
-- GitHub push is asynchronous backup — happens after the site is already live
-- No dependency on GitHub Actions or external CI
-
-### Commit Format
-
-```
-content(hero): update availability status [nanobot]
-content(projects): add maya-miro GitHub link [nanobot]
-content(experience): update 2024 highlights [nanobot]
-```
-
-The `[nanobot]` suffix makes admin commits easily identifiable in git log.
-
-### Git Configuration on Server
-
-The server process needs:
-- Git user name and email configured: `git config user.name "NanoBot"` + `git config user.email "nanobot@akhileshnanda.maya-ai.dev"`
-- GitHub credentials: SSH deploy key with write access to the repo (preferred over HTTPS token)
-- SSH deploy key stored at `~/.ssh/nanobot_deploy_key`, loaded via SSH agent
-
----
-
-## 5. Security Model
-
-### Authentication
-
-| Surface | Mechanism | Expiry |
-|---|---|---|
-| Admin mode | Single password → JWT | 24h, sessionStorage only |
-| Visitor/Recruiter | No auth | — |
-
-Password is stored as `ADMIN_PASSWORD` environment variable on the server. Never in source code. Never in `content/` files.
-
-### Rate Limiting
-
-| Endpoint | Limit |
-|---|---|
-| `POST /api/maya` (visitor/recruiter) | 20 requests / minute / IP |
-| `POST /api/admin/login` | 5 attempts / 15 minutes / IP |
-| `POST /api/admin/content/*` | 10 requests / minute / IP (per authenticated session) |
-| `POST /api/admin/deploy` | 2 requests / minute / IP |
-
-### Content Write Protection
-
-Server-side validation before any write:
-
-```
-1. Is the requester authenticated? (valid JWT)
-2. Is the target file in the allowed list?
-   allowed = ['hero', 'projects', 'experience', 'skills', 'stats', 'contact']
-   if not allowed: reject 403
-3. Does the updated JSON match the schema for that section?
-   if invalid: reject 400 with validation error
-4. Atomic write: write to <section>.json.tmp, then rename
-   if rename fails: keep original, return 500
-```
-
-Path traversal is impossible because the server maps `sectionName` to a hardcoded file path — no user-provided paths reach the filesystem.
-
-### NanoBot Cannot
-
-- Run arbitrary shell commands
-- Read server environment variables
-- Access files outside `content/`
-- Modify any non-content file
-- Access the admin JWT from the frontend (it stays in sessionStorage, never logged)
-
-### What Happens If Maya Goes Down
-
-- Visitor and Recruiter modes: NanoBot shows "OFFLINE" state in chat bubble. Sprite continues roaming.
-- Admin mode: NanoBot shows "OFFLINE — content edits unavailable". No data loss (no partial writes).
-
----
-
-## 6. Deployment Flow
-
-### Baseline (Current Setup)
-
-Oracle server runs:
-- Node.js API server (Express) on port 3001
-- nginx proxies `/api/*` to port 3001
-- nginx serves static frontend build from `/var/www/portfolio/dist/`
-
-### After NanoBot Admin Edit
-
-```
-Server process (Node.js):
-  ├── Writes content/<section>.json to disk
-  ├── Runs: cd /path/to/newakhilesh/frontend && npm run build
-  ├── Copies dist/ to /var/www/portfolio/dist/ (or builds in-place)
-  ├── Runs: git add content/<section>.json && git commit && git push
-  └── Returns success to NanoBot chat
-
-nginx:
-  → Already serving /var/www/portfolio/dist/
-  → No nginx reload needed (static files update on disk)
-
-Visitor:
-  → Sees new content on next page load (hard reload clears cache)
-```
-
-### Build Time
-
-Vite build of the portfolio: ~15–25 seconds. This is the delay between admin approval and content going live.
-
-NanoBot should communicate this:
-```
-NanoBot: "Applied. Rebuilding — live in ~20 seconds."
-        [progress indicator]
-        "Done. 🤖 /projects updated."
-```
-
-### Manual Deployment (No NanoBot)
-
-For code changes (components, not content), deployment remains manual:
-```bash
-git push origin main
-# SSH to server:
-git pull && npm run build
-```
-
-NanoBot never touches this path.
-
----
-
-## 7. Risks
-
-| Risk | Severity | Mitigation |
-|---|---|---|
-| Build fails during admin session | Medium | Catch build error, report to NanoBot, keep old dist/, do not commit |
-| Git push fails (network, auth) | Low | Report to NanoBot "saved locally, push failed — will retry". Content is already live (local build succeeded). |
-| Maya API misunderstands edit intent | Medium | NanoBot always shows a diff preview before applying. Admin must explicitly confirm. |
-| Admin password brute force | High | Rate limit login to 5 attempts / 15 min / IP. Lockout after 10 total failed attempts. |
-| Content JSON corrupted | Medium | Schema validation before write. Atomic write (tmp → rename). Git history allows rollback. |
-| Recruiter lead capture fails | Low | Lead POST is fire-and-forget. Chat continues regardless. Log failures server-side. |
-| NanoBot roaming interferes with section interaction | Medium | NanoBot collision detection with interactive elements. Pause roaming when user is scrolling fast or when an interactive element has focus. |
-| Build blocks API responses | Medium | Run build in a child process. API remains responsive during build. Report status via polling or SSE. |
-
----
-
-## 8. Future Enhancements
-
-These are not in scope for any current phase. Document for later consideration.
-
-**Conversational memory**  
-NanoBot remembers what a recruiter asked earlier in the same session. Currently each message is stateless. A simple in-memory conversation history (last 10 turns) sent with each Maya request would make the chat feel more natural.
-
-**NanoBot personality evolution**  
-The droid's animation state could reflect the conversation — confused when it doesn't know an answer, excited when talking about Maya MIRO, professional when in recruiter mode. Currently FSM states are roaming/idle/talking.
-
-**Admin diff view**  
-Before approving a content change, show a readable diff (not raw JSON). "You're changing 'Open to work' → 'Actively interviewing'" is clearer than showing the full JSON.
-
-**Content rollback via NanoBot**  
-Admin can ask "undo the last change" and NanoBot runs `git revert HEAD` on the content file. Since all content changes are commits, rollback is always possible.
-
-**Scheduled content updates**  
-Admin can say "update oracle uptime every hour" — NanoBot sets a cron job to refresh `stats.json` from the live Oracle API. Currently stats only update when admin edits or `/api/stats` is polled by the frontend.
-
-**NanoBot explains sections**  
-When a visitor scrolls to Projects, NanoBot proactively wanders closer and shows a hint bubble: "Ask me about any of these." Triggered by scroll position. Opt-in — does not interrupt reading.
-
----
-
-## Implementation Notes
-
-When building (Phase 6+), the smallest viable NanoBot system is:
-
-1. **Sprite + FSM** — already working in `newakhilesh/src/` playground
-2. **Chat bubble with role selector** — already working in playground
-3. **Maya API call** — already exists at `/api/maya`, just needs mode parameter added to prompt routing
-4. **Admin auth** — new: `POST /api/admin/login` returns JWT, stored in sessionStorage
-5. **Content write** — new: `POST /api/admin/content/:section`, validates + writes + builds + commits
-6. **Roaming integration** — mount NanoBot as a fixed overlay in App.jsx, same as AiTerminal was
-
-That is the entire system. No new frameworks. No new databases. No agent orchestration. One LLM call per message, one server endpoint per action.
+## What Is NOT Connected Yet
+
+- **No API calls** — all responses are hardcoded in `EchoBubble.tsx`
+- **Admin mode** — placeholder only, no auth or content editing
+- **THINKING state** — wired in FSM but never fires until API is connected
+- **NanoBot serve** (port 8900) — not started; `routes/maya.js` still calls old provider
+
+## What Needs to Happen Next (API Phase)
+
+1. Start `nanobot serve` on port 8900 (PM2)
+2. Rewrite `server/portfolio-api/routes/maya.js` to proxy to `http://127.0.0.1:8900/v1/chat/completions`
+3. Create `frontend/src/services/nanobot.service.ts` — `sendMessage(text, mode, history)`
+4. Replace hardcoded responses in `EchoBubble.tsx` with live API calls
+5. Dispatch `MESSAGE_SENT` / `REPLY_RECEIVED` to FSM around the API call
+6. Add streaming (`stream: true`) for word-by-word response rendering

@@ -1,13 +1,18 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import SpriteAnimator from './SpriteAnimator'
-import ChatBubble from './ChatBubble'
+import EchoBubble from './EchoBubble'
 import { useNanoBot } from './useNanoBot'
 
 export default function NanoBot() {
-  const { fsm, pos, displaySize, moveDuration, handleClick, handleRoleSelect, handleClose } = useNanoBot()
+  const {
+    fsm, pos, displaySize, moveDuration,
+    handleClick, handleRoleSelect, handleClose,
+    handleMessageSent, handleReplyReceived,
+    hint, dismissHint,
+  } = useNanoBot()
 
   const isMoving = fsm.state === 'ROAMING' || fsm.state === 'LEAVING'
-  const isTalking = fsm.state === 'TALKING'
+  const isChatOpen = fsm.state === 'TALKING' || fsm.state === 'THINKING'
 
   return (
     <motion.div
@@ -27,35 +32,72 @@ export default function NanoBot() {
         WebkitTapHighlightColor: 'transparent',
       }}
       onClick={handleClick}
-      aria-label="NanoBot — click to chat"
+      aria-label="Echo — click to chat"
       role="button"
       tabIndex={0}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleClick() }}
     >
       <div style={{ position: 'relative' }}>
-        <ChatBubble
+        <EchoBubble
           fsm={fsm}
           onRoleSelect={handleRoleSelect}
           onClose={handleClose}
+          onMessageSent={handleMessageSent}
+          onReplyReceived={handleReplyReceived}
           displaySize={displaySize}
         />
-        {/* subtle glow ring when talking */}
-        {isTalking && (
-          <div style={{
-            position: 'absolute',
-            inset: -4,
-            borderRadius: '50%',
-            boxShadow: '0 0 14px 4px rgba(129, 1, 0, 0.35)',
-            pointerEvents: 'none',
-          }} />
-        )}
+
+        {/* proactive hint tooltip */}
+        <AnimatePresence>
+          {hint && !isChatOpen && (
+            <motion.div
+              key="hint"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.2 }}
+              onClick={e => { e.stopPropagation(); dismissHint() }}
+              style={{
+                position: 'absolute',
+                bottom: 'calc(100% + 10px)',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(27,23,22,0.9)',
+                color: '#EDEBDE',
+                fontFamily: 'monospace',
+                fontSize: 11,
+                padding: '5px 10px',
+                borderRadius: 5,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'all',
+                cursor: 'pointer',
+                border: '1px solid rgba(129,1,0,0.4)',
+                letterSpacing: '0.03em',
+              }}
+            >
+              {hint}
+              <div style={{
+                position: 'absolute',
+                bottom: -5,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '5px solid transparent',
+                borderRight: '5px solid transparent',
+                borderTop: '5px solid rgba(27,23,22,0.9)',
+              }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <SpriteAnimator
             state={fsm.state}
             facingLeft={fsm.facingLeft}
             displaySize={displaySize}
           />
-          {/* Cherry Red indicator dot — the droid's "eye" */}
+          {/* Cherry Red indicator dot */}
           <div style={{
             position: 'absolute',
             top: Math.round(displaySize * 0.28),
@@ -68,6 +110,7 @@ export default function NanoBot() {
             pointerEvents: 'none',
           }} />
         </div>
+
         {/* ECHO name label */}
         <div style={{
           textAlign: 'center',

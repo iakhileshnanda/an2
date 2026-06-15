@@ -1,0 +1,202 @@
+.bubble {
+  width: 240px;
+  max-width: calc(100vw - 32px);
+  background: #EDEBDE;
+  border: 2px solid #1B1716;
+  box-shadow: 3px 3px 0 0 #1B1716;
+  font-family: 'Courier New', Courier, monospace;
+  position: absolute;
+  bottom: calc(100% + 14px);
+  z-index: 100;
+}
+
+/* ── Header bar ─────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: #1B1716;
+}
+
+.headerText {
+  color: #EDEBDE;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: rgba(237, 235, 222, 0.55);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  font-family: monospace;
+}
+
+.closeBtn:hover {
+  color: #EDEBDE;
+}
+
+/* ── Divider ─────────────────────────────────────── */
+
+.divider {
+  height: 2px;
+  background: #1B1716;
+}
+
+/* ── Prompt line ─────────────────────────────────── */
+
+.prompt {
+  padding: 8px 12px 6px;
+  font-size: 11px;
+  color: #1B1716;
+  line-height: 1.45;
+}
+
+/* ── Menu ────────────────────────────────────────── */
+
+.menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px 6px 8px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(27, 23, 22, 0.1);
+  cursor: pointer;
+  width: 100%;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #1B1716;
+  text-align: left;
+}
+
+.menuItem:last-child {
+  border-bottom: none;
+}
+
+.menuItemActive {
+  background: #1B1716;
+  color: #EDEBDE;
+}
+
+.menuCursor {
+  width: 12px;
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #810100;
+  display: inline-block;
+}
+
+.menuItemActive .menuCursor {
+  color: #EDEBDE;
+}
+
+.menuLabel {
+  flex: 1;
+}
+
+.menuArrow {
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.menuItemActive .menuArrow {
+  opacity: 0.8;
+  color: #EDEBDE;
+}
+
+/* ── Response ─────────────────────────────────────── */
+
+.responseBody {
+  padding: 10px 12px;
+  min-height: 72px;
+}
+
+.responseLine {
+  font-size: 11px;
+  line-height: 1.55;
+  color: #1B1716;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Back / footer button ─────────────────────────── */
+
+.backBtn {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  color: rgba(27, 23, 22, 0.45);
+  text-align: left;
+  letter-spacing: 0.05em;
+}
+
+.backBtn:hover {
+  color: #1B1716;
+  background: rgba(27, 23, 22, 0.05);
+}
+
+/* ── Admin placeholder ────────────────────────────── */
+
+.adminBody {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adminTitle {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(27, 23, 22, 0.4);
+  text-transform: uppercase;
+}
+
+.adminText {
+  font-size: 11px;
+  color: #810100;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Bubble tail ──────────────────────────────────── */
+
+.tail {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 10px solid #1B1716;
+}
+
+.tailInner {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #EDEBDE;
+}

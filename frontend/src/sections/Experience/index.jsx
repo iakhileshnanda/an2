@@ -96,6 +96,7 @@ export default function Experience() {
 
   return (
     <section
+      id="experience"
       ref={sectionRef}
       className="scene-section relative overflow-hidden"
     >

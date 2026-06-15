@@ -24,6 +24,7 @@ export default defineConfig({
       '@styles': path.resolve(__dirname, 'src/styles'),
       '@assets': path.resolve(__dirname, 'src/assets'),
       '@content': path.resolve(__dirname, '..', 'content'),
+      '@echo': path.resolve(__dirname, 'src/echo'),
     },
   },
 })

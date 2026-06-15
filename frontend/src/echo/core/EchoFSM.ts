@@ -1,20 +1,17 @@
-import type { BotState, UserRole } from './types'
+import type { BotState } from './types'
 
 export type FSMEvent =
   | { type: 'CLICK' }
   | { type: 'DOUBLE_CLICK' }
-  | { type: 'TRIPLE_CLICK' }
-  | { type: 'ROLE_SELECTED'; role: UserRole }
+  | { type: 'MESSAGE_SENT' }
+  | { type: 'REPLY_RECEIVED' }
   | { type: 'CLOSE' }
   | { type: 'LEAVE_DONE' }
   | { type: 'ROAM_TICK' }
   | { type: 'ANIM_DONE' }
-  | { type: 'MESSAGE_SENT' }
-  | { type: 'REPLY_RECEIVED' }
 
 export interface FSMContext {
   state: BotState
-  role: UserRole | null
   facingLeft: boolean
   speed: 'slow' | 'normal' | 'fast'
   prevState: BotState
@@ -24,7 +21,6 @@ export interface FSMContext {
 export function createFSM(): FSMContext {
   return {
     state: 'ROAMING',
-    role: null,
     facingLeft: false,
     speed: 'normal',
     prevState: 'ROAMING',
@@ -39,15 +35,10 @@ export function transition(ctx: FSMContext, event: FSMEvent): FSMContext {
     case 'IDLE':
     case 'SLEEPING': {
       if (event.type === 'CLICK') {
-        return { ...ctx, state: 'TALKING', role: null, prevState: ctx.state }
+        return { ...ctx, state: 'TALKING', prevState: ctx.state }
       }
       if (event.type === 'DOUBLE_CLICK') {
-        // jump then land in visitor chat (skip role picker)
         return { ...ctx, state: 'JUMPING', prevState: ctx.state, jumpReason: 'click' }
-      }
-      if (event.type === 'TRIPLE_CLICK') {
-        // secret gesture — opens admin gate directly
-        return { ...ctx, state: 'TALKING', role: 'admin', prevState: ctx.state }
       }
       if (event.type === 'ROAM_TICK') {
         const { next, facing, speed } = roamNext(ctx.state)
@@ -59,8 +50,7 @@ export function transition(ctx: FSMContext, event: FSMEvent): FSMContext {
     case 'JUMPING': {
       if (event.type === 'ANIM_DONE') {
         if (ctx.jumpReason === 'click') {
-          // land directly into visitor chat
-          return { ...ctx, state: 'TALKING', role: 'visitor', jumpReason: 'roam' }
+          return { ...ctx, state: 'TALKING', jumpReason: 'roam' }
         }
         const squish = Math.random() < 0.5
         if (squish) return { ...ctx, state: 'SQUISH' }
@@ -70,42 +60,24 @@ export function transition(ctx: FSMContext, event: FSMEvent): FSMContext {
     }
 
     case 'SQUISH': {
-      if (event.type === 'ANIM_DONE') {
-        return { ...ctx, state: 'IDLE' }
-      }
+      if (event.type === 'ANIM_DONE') return { ...ctx, state: 'IDLE' }
       return ctx
     }
 
     case 'TALKING': {
-      if (event.type === 'ROLE_SELECTED') {
-        if (event.role === 'none') {
-          return { ...ctx, role: 'none', state: 'LEAVING' }
-        }
-        return { ...ctx, role: event.role }
-      }
-      if (event.type === 'CLOSE') {
-        return { ...ctx, state: 'LEAVING' }
-      }
-      if (event.type === 'MESSAGE_SENT') {
-        return { ...ctx, state: 'THINKING' }
-      }
+      if (event.type === 'MESSAGE_SENT') return { ...ctx, state: 'THINKING' }
+      if (event.type === 'CLOSE') return { ...ctx, state: 'LEAVING' }
       return ctx
     }
 
     case 'THINKING': {
-      if (event.type === 'REPLY_RECEIVED') {
-        return { ...ctx, state: 'TALKING' }
-      }
-      if (event.type === 'CLOSE') {
-        return { ...ctx, state: 'LEAVING' }
-      }
+      if (event.type === 'REPLY_RECEIVED') return { ...ctx, state: 'TALKING' }
+      if (event.type === 'CLOSE') return { ...ctx, state: 'LEAVING' }
       return ctx
     }
 
     case 'LEAVING': {
-      if (event.type === 'LEAVE_DONE') {
-        return { ...ctx, state: 'ROAMING', role: null }
-      }
+      if (event.type === 'LEAVE_DONE') return { ...ctx, state: 'ROAMING' }
       return ctx
     }
 
@@ -117,11 +89,7 @@ export function transition(ctx: FSMContext, event: FSMEvent): FSMContext {
 function roamNext(current: BotState): { next: BotState; facing: boolean; speed: FSMContext['speed'] } {
   const roll = Math.random()
   const facing = Math.random() > 0.5
-
-  if (current === 'SLEEPING') {
-    return { next: 'IDLE', facing, speed: 'slow' }
-  }
-
+  if (current === 'SLEEPING') return { next: 'IDLE', facing, speed: 'slow' }
   if (roll < 0.50) return { next: 'ROAMING',  facing, speed: randomSpeed() }
   if (roll < 0.70) return { next: 'IDLE',     facing, speed: 'normal' }
   if (roll < 0.85) return { next: 'SLEEPING', facing, speed: 'slow' }

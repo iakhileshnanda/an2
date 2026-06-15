@@ -122,7 +122,7 @@ export default function Numbers() {
     : null;
 
   return (
-    <section className="scene-section min-h-screen flex items-center py-24">
+    <section id="numbers" className="scene-section min-h-screen flex items-center py-24">
       <div className="max-w-6xl mx-auto px-6 w-full">
         <div className="flex items-center justify-center mb-16 gap-4">
           <h2 className={`font-monument text-[#1B1716] text-center ${styles.sectionTitle}`}>

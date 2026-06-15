@@ -4,7 +4,7 @@ import Experience from '@sections/Experience'
 import Projects from '@sections/Projects'
 import Numbers from '@sections/Numbers'
 import HeroMark from '@components/HeroMark'
-import NanoBot from '../../nanobot/NanoBot'
+import EchoRoot from '../../echo/EchoRoot'
 
 const AwakeningScene = lazy(() => import('@system/scenes/AwakeningScene'))
 const AskScene = lazy(() => import('@system/scenes/AskScene'))
@@ -25,7 +25,7 @@ export default function HomePage() {
         <AskScene />
       </Suspense>
 
-      <NanoBot />
+      <EchoRoot />
     </div>
   )
 }

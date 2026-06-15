@@ -61,7 +61,7 @@ function ProjectCard({ project, index }) {
 
 export default function Projects() {
   return (
-    <section className="scene-section min-h-screen py-24 md:py-32">
+    <section id="projects" className="scene-section min-h-screen py-24 md:py-32">
       <div className="max-w-6xl mx-auto px-6">
         <h2
           className={`font-monument text-[#1B1716] text-center mb-20 ${styles.sectionTitle}`}
