@@ -26,20 +26,15 @@ export default function ThunderInput({ value, onChange, onSubmit, disabled, plac
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Outer cream frame */}
+        {/* Outer frame — transparent body, just the outline */}
         <polygon
           className={styles.frame}
           points="22,0 296,0 289,48 1,48"
-          fill="#EDEBDE"
+          fill="none"
           stroke="#1B1716"
           strokeWidth="1.5"
         />
-        {/* Inner dark body */}
-        <polygon
-          points="26,3.5 292,3.5 285,44.5 5,44.5"
-          fill="#1B1716"
-        />
-        {/* Left red accent bar — P5 oblique stripe */}
+        {/* Left red accent bar — P5 oblique stripe, keeps the thunder identity */}
         <polygon
           points="26,3.5 38,3.5 17,44.5 5,44.5"
           fill="#810100"

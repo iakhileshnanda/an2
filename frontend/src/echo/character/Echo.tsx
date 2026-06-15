@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEchoStore } from '../store/echoStore'
 import { useEcho } from '../core/useEcho'
@@ -14,10 +13,7 @@ export default function Echo() {
   const { intent, messages, isLoading, selectIntent, sendMessage, reset } = useChat()
 
   const chatVisible  = ['TALKING', 'THINKING'].includes(fsm.state)
-  const [showIntro, setShowIntro] = useState(true)
-
   function onSpriteClick() {
-    setShowIntro(false)
     handleClick()
   }
 
@@ -64,76 +60,9 @@ export default function Echo() {
         />
       </div>
 
-      {/* Intro label — floats above droid until first click */}
+      {/* Contextual hint */}
       <AnimatePresence>
-        {showIntro && !chatVisible && (
-          <motion.div
-            key="intro"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{
-              opacity: 1,
-              y: [0, -5, 0],
-            }}
-            transition={{
-              opacity: { duration: 0.4 },
-              y: { duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 },
-            }}
-            exit={{ opacity: 0, y: 4, transition: { duration: 0.15 } }}
-            onClick={onSpriteClick}
-            style={{
-              position: 'absolute',
-              bottom: '100%',
-              marginBottom: 6,
-              left: '50%',
-              transform: 'translateX(-50%) skewX(-7deg)',
-              background: '#1B1716',
-              border: '1.5px solid #EDEBDE',
-              boxShadow: '2px 2px 0 rgba(27,23,22,0.35)',
-              padding: '5px 16px 6px',
-              cursor: 'pointer',
-              pointerEvents: 'auto',
-              whiteSpace: 'nowrap',
-              zIndex: 9002,
-            }}
-          >
-            {/* Counter-skew the text so it reads straight */}
-            <div style={{ transform: 'skewX(7deg)', textAlign: 'center' }}>
-              <div style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 9,
-                fontWeight: 700,
-                color: '#EDEBDE',
-                letterSpacing: '0.14em',
-              }}>
-                CLICK ME
-              </div>
-              <div style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 7.5,
-                color: 'rgba(237,235,222,0.42)',
-                letterSpacing: '0.07em',
-                marginTop: 2,
-              }}>
-                to know akhilesh
-              </div>
-            </div>
-            {/* Downward pointer */}
-            <div style={{
-              position: 'absolute',
-              bottom: -5,
-              left: '50%',
-              transform: 'translateX(-50%) skewX(7deg)',
-              borderLeft: '4px solid transparent',
-              borderRight: '4px solid transparent',
-              borderTop: '4px solid #EDEBDE',
-            }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Contextual hint — only after intro is gone */}
-      <AnimatePresence>
-        {hint && !chatVisible && !showIntro && (
+        {hint && !chatVisible && (
           <motion.div
             key="hint"
             initial={{ opacity: 0, y: 4 }}

@@ -23,16 +23,14 @@ export default function ThunderField({ children, dim, onClick, delay = 0 }: Prop
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Cotton outer frame — stroke animates in (P5 draw-in) */}
+        {/* Outer frame — stroke animates in, no inner fill (transparent body) */}
         <polygon
           className={styles.frame}
           points="24,0 296,0 289,38 3,38"
-          fill="#EDEBDE"
+          fill="none"
           stroke="#1B1716"
           strokeWidth="1.5"
         />
-        {/* Noir inner body */}
-        <polygon points="28,2.5 292,2.5 285,35.5 7,35.5" fill="#1B1716" />
         {/* Left thunder — upper wing */}
         <polygon
           className={styles.wingTop}

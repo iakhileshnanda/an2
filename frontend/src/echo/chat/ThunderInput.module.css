@@ -18,16 +18,14 @@
   background: transparent;
   border: none;
   outline: none;
-  /* left: clear past red accent bar (~38/308 ≈ 13%) */
-  /* right: clear past send arrow (~274/308 ≈ 89%)   */
   padding: 0 13% 0 15%;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   font-size: 11px;
-  color: #EDEBDE;
+  color: #1B1716;
   letter-spacing: 0.03em;
   cursor: text;
 }
-.input::placeholder { color: rgba(237,235,222,0.18); }
+.input::placeholder { color: rgba(27,23,22,0.25); }
 .input:disabled { opacity: 0.4; cursor: default; }
 
 /* Send button covers the arrow region on the right */
@@ -42,15 +40,15 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: rgba(237,235,222,0.15);
+  color: rgba(27,23,22,0.2);
   padding: 0;
   transition: color 0.12s;
 }
 .sendActive {
   cursor: pointer;
-  color: rgba(237,235,222,0.5);
+  color: rgba(27,23,22,0.55);
 }
-.sendActive:hover { color: #EDEBDE; }
+.sendActive:hover { color: #1B1716; }
 
 /* P5 draw-in animation */
 @keyframes drawFrame {

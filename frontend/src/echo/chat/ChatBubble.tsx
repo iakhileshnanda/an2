@@ -3,17 +3,18 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { ChatMessage, EchoIntent } from './chatService'
 import ThunderField from './ThunderField'
 import ThunderInput from './ThunderInput'
+import GlitchText from './GlitchText'
 import styles from './ChatBubble.module.css'
 
-/* P5 reversed-square accent: one character gets an inverted colour block */
 function Acc({ c }: { c: string }) {
   return <span className={styles.acc}>{c}</span>
 }
 
+/* Short labels for side-by-side horizontal row */
 const INTENTS: Array<{ key: EchoIntent; label: string }> = [
-  { key: 'recruiting',    label: 'RECRUITING / HIRING'  },
-  { key: 'collaborating', label: 'COLLABORATE'          },
-  { key: 'curious',       label: 'CURIOUS PROJECT'      },
+  { key: 'recruiting',    label: 'HIRE'    },
+  { key: 'collaborating', label: 'COLLAB'  },
+  { key: 'curious',       label: 'CURIOUS' },
 ]
 
 interface Props {
@@ -35,7 +36,6 @@ export default function ChatBubble({
   const isChat     = intent !== null
   const isFarewell = intent === 'roaming'
 
-  const lastUserMsg = messages.filter((m) => m.role === 'user').at(-1)
   const lastEchoMsg = messages.filter((m) => m.role === 'echo').at(-1)
 
   function submit() {
@@ -58,63 +58,60 @@ export default function ChatBubble({
           onClick={(e) => e.stopPropagation()}
         >
 
-          {/* ── Flow 1: Intent picker ─────────────────── */}
+          {/* ── Flow 1: Intent — side by side ─────────── */}
           {!isChat && (
             <div className={styles.stack}>
-              {/* P5 header — irregular letter casing + accent char */}
               <p className={styles.p5Head}>
                 WH<Acc c="O" />&nbsp;R&nbsp;U
               </p>
 
-              {INTENTS.map((opt, i) => (
-                <ThunderField
-                  key={opt.key}
-                  onClick={() => onIntentSelect(opt.key)}
-                  delay={i * 65}
-                >
-                  <span className={styles.arrow}>►</span>
-                  {opt.label}
-                </ThunderField>
-              ))}
+              {/* Horizontal row — three glitch labels, no thunder container */}
+              <div className={styles.intentRow}>
+                {INTENTS.map((opt, i) => (
+                  <motion.button
+                    key={opt.key}
+                    className={styles.intentBtn}
+                    onClick={() => onIntentSelect(opt.key)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.07 }}
+                  >
+                    <GlitchText
+                      speed={1.2 + i * 0.3}
+                      enableShadows
+                      enableOnHover
+                      className={styles.intentGlitch}
+                    >
+                      {opt.label}
+                    </GlitchText>
+                  </motion.button>
+                ))}
+              </div>
 
-              <button
-                className={styles.roamLink}
-                onClick={() => onIntentSelect('roaming')}
-              >
+              <button className={styles.roamLink} onClick={() => onIntentSelect('roaming')}>
                 just roaming →
               </button>
             </div>
           )}
 
-          {/* ── Flow 2: Chat conversation ─────────────── */}
+          {/* ── Flow 2: Chat ──────────────────────────── */}
           {isChat && (
             <div className={styles.stack}>
-              <button className={styles.closeBtn} onClick={onClose}>
-                × CLOSE
-              </button>
+              <button className={styles.closeBtn} onClick={onClose}>× CLOSE</button>
 
-              {/* Field A — user context (dim) */}
-              <ThunderField dim delay={0}>
-                {lastUserMsg
-                  ? <><span className={styles.youLabel}>YOU</span>{lastUserMsg.text}</>
-                  : intent.toUpperCase()
-                }
-              </ThunderField>
-
-              {/* Field B — Echo's reply */}
-              <ThunderField delay={80}>
+              {/* Echo's reply inside transparent ThunderField */}
+              <ThunderField delay={0}>
                 {isLoading ? (
-                  <div className={styles.dots}>
-                    <div className={styles.dot} />
-                    <div className={styles.dot} />
-                    <div className={styles.dot} />
-                  </div>
+                  <GlitchText speed={0.6} enableShadows className={styles.echoGlitch}>
+                    PROCESSING...
+                  </GlitchText>
                 ) : (
-                  <><span className={styles.echoIcon}>◈</span>{lastEchoMsg?.text ?? ''}</>
+                  <GlitchText speed={2} enableShadows={false} enableOnHover className={styles.echoGlitch}>
+                    {lastEchoMsg?.text ?? ''}
+                  </GlitchText>
                 )}
               </ThunderField>
 
-              {/* Thunder-shaped input — replaces rectangular chat panel */}
               {!isFarewell && (
                 <ThunderInput
                   value={input}

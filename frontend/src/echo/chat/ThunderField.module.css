@@ -17,14 +17,11 @@
   align-items: center;
   padding-left: 18%;
   padding-right: 9%;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 11px;
-  color: #EDEBDE;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: 0.02em;
   pointer-events: none;
+  /* GlitchText vars — pseudo-elements mask against the portfolio cream bg */
+  --glitch-color: #1B1716;
+  --glitch-bg: #EDEBDE;
 }
 
 .dim { opacity: 0.38; }

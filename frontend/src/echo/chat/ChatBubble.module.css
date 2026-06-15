@@ -5,9 +5,7 @@
   position: relative;
 }
 
-/* ── P5 accent char ──────────────────────────────────── */
-/* One character in a label gets a reversed colour block —
-   this is the core Persona 5 irregular-title treatment   */
+/* ── P5 accent char ─────────────────────────────────── */
 .acc {
   display: inline-block;
   background: #810100;
@@ -19,10 +17,10 @@
   vertical-align: middle;
 }
 
-/* ── "WH[O] R U" section header ────────────────────── */
+/* ── "WH[O] R U" header ────────────────────────────── */
 .p5Head {
-  margin: 0 0 3px 0;
-  padding-left: 5%;
+  margin: 0 0 6px 0;
+  padding-left: 2px;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   font-size: 11px;
   font-weight: 700;
@@ -30,19 +28,35 @@
   letter-spacing: 0.18em;
 }
 
-/* ── Intent arrow glyph ────────────────────────────── */
-.arrow {
-  color: #810100;
-  font-size: 8px;
-  margin-right: 7px;
-  flex-shrink: 0;
+/* ── Horizontal intent row ──────────────────────────── */
+.intentRow {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  align-items: center;
+}
+
+.intentBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  /* GlitchText pseudo-elements need to mask against the page bg */
+  --glitch-bg: #EDEBDE;
+  --glitch-color: #1B1716;
+}
+
+/* Font-size override for the intent labels */
+.intentGlitch {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.1em !important;
 }
 
 /* ── "just roaming" link ────────────────────────────── */
 .roamLink {
   display: block;
-  margin-top: 4px;
-  margin-left: 8%;
+  margin-top: 2px;
   background: none;
   border: none;
   cursor: pointer;
@@ -56,37 +70,17 @@
 }
 .roamLink:hover { color: rgba(27,23,22,0.55); }
 
-/* ── Chat field labels ──────────────────────────────── */
-.echoIcon {
-  color: #810100;
-  font-size: 8px;
-  margin-right: 7px;
-  flex-shrink: 0;
-}
-.youLabel {
-  font-size: 9px;
-  color: rgba(237,235,222,0.38);
-  margin-right: 7px;
-  letter-spacing: 0.07em;
+/* ── Echo glitch text inside the transparent ThunderField ── */
+.echoGlitch {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-/* ── Thinking dots ──────────────────────────────────── */
-.dots {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(237,235,222,0.4);
-}
-.dot:nth-child(1) { animation: blink 1.2s ease-in-out 0.0s infinite; }
-.dot:nth-child(2) { animation: blink 1.2s ease-in-out 0.2s infinite; }
-.dot:nth-child(3) { animation: blink 1.2s ease-in-out 0.4s infinite; }
-
-/* ── Close button (P5 mono label, not just "×") ─────── */
+/* ── Close button ────────────────────────────────────── */
 .closeBtn {
   position: absolute;
   top: -18px;
@@ -104,9 +98,3 @@
   z-index: 10;
 }
 .closeBtn:hover { color: #1B1716; }
-
-/* ── Keyframes ──────────────────────────────────────── */
-@keyframes blink {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-  40%            { opacity: 1;   transform: scale(1);   }
-}
