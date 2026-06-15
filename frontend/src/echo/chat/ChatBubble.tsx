@@ -78,7 +78,7 @@ export default function ChatBubble({
                   >
                     <GlitchText
                       speed={1.2 + i * 0.3}
-                      enableShadows
+                     
                       enableOnHover
                       className={styles.intentGlitch}
                     >
@@ -102,11 +102,11 @@ export default function ChatBubble({
               {/* Echo's reply inside transparent ThunderField */}
               <ThunderField delay={0}>
                 {isLoading ? (
-                  <GlitchText speed={0.6} enableShadows className={styles.echoGlitch}>
+                  <GlitchText speed={0.6} className={styles.echoGlitch}>
                     PROCESSING...
                   </GlitchText>
                 ) : (
-                  <GlitchText speed={2} enableShadows={false} enableOnHover className={styles.echoGlitch}>
+                  <GlitchText speed={2} enableOnHover className={styles.echoGlitch}>
                     {lastEchoMsg?.text ?? ''}
                   </GlitchText>
                 )}

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import {
   motion,
   useScroll,
@@ -126,8 +126,8 @@ export default function HeroMark() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Update position + scale on every scroll tick
-  useMotionValueEvent(scrollY, 'change', (latest) => {
+  // Update position + scale on every scroll tick — useCallback so the reference is stable
+  const onScroll = useCallback((latest) => {
     if (!posRef.current) return
     const { startX, startY, endX, endY, logoScale } = posRef.current
     const end = window.innerHeight * 0.7
@@ -136,7 +136,9 @@ export default function HeroMark() {
     xMV.set(lerp(startX, endX, progress))
     yMV.set(lerp(startY, endY, progress))
     scrollScaleMV.set(lerp(1, logoScale, progress))
-  })
+  }, [xMV, yMV, scrollScaleMV])
+
+  useMotionValueEvent(scrollY, 'change', onScroll)
 
   return (
     <div className={styles.root} aria-hidden="true">

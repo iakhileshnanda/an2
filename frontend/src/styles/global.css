@@ -236,6 +236,15 @@ body {
   }
 }
 
+/* ── FILM GRAIN — disable where SVG filter cost is unjustified ── */
+@media (max-width: 768px) {
+  .film-grain { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-grain { display: none; }
+}
+
 /* ── REDUCED MOTION ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

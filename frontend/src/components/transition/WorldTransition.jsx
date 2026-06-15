@@ -11,15 +11,15 @@ export default function WorldTransition() {
 
   useEffect(() => {
     setPhase(0);
-    const t1 = setTimeout(() => setPhase(1), 400);
-    const t2 = setTimeout(() => setPhase(2), 800);
+    const t1 = setTimeout(() => setPhase(1), 267);
+    const t2 = setTimeout(() => setPhase(2), 533);
     const t3 = setTimeout(() => {
       setPhase(3);
       navigate(mode === 'system' ? '/human' : '/');
-    }, 1200);
+    }, 800);
     const t4 = setTimeout(() => {
       setTransitioning(false);
-    }, 1800);
+    }, 1200);
 
     return () => {
       clearTimeout(t1); clearTimeout(t2);
@@ -43,41 +43,41 @@ export default function WorldTransition() {
                 style={{ top: `${y}%`, height: `${3 + Math.random() * 4}px`, background: '#FFF' }}
                 initial={{ x: '-100%' }}
                 animate={{ x: '100vw' }}
-                transition={{ duration: 0.35, delay: i * 0.04, ease: 'easeInOut' }}
+                transition={{ duration: 0.25, delay: i * 0.03, ease: 'easeInOut' }}
               />
             ))}
           </>
         )}
       </AnimatePresence>
 
-      {/* Phase 1: Fragmentation */}
+      {/* Phase 1: Fragmentation — 4×4 grid (16 fragments) */}
       {phase >= 1 && phase < 3 && (
         <div className="absolute inset-0 overflow-hidden">
-          {Array.from({ length: 48 }).map((_, i) => {
-            const col = i % 8;
-            const row = Math.floor(i / 8);
-            const delay = Math.random() * 0.2;
-            const rotation = (Math.random() - 0.5) * 30;
-            const xDrift = (Math.random() - 0.5) * 200;
+          {Array.from({ length: 16 }).map((_, i) => {
+            const col = i % 4;
+            const row = Math.floor(i / 4);
+            const delay = Math.random() * 0.15;
+            const rotation = (Math.random() - 0.5) * 25;
+            const xDrift = (Math.random() - 0.5) * 160;
             return (
               <motion.div
                 key={`frag-${i}`}
                 className={`absolute ${styles.fragment}`}
                 style={{
-                  left: `${col * 12.5}%`,
-                  top: `${row * 16.667}%`,
-                  width: '12.5%',
-                  height: '16.667%',
+                  left: `${col * 25}%`,
+                  top: `${row * 25}%`,
+                  width: '25%',
+                  height: '25%',
                   background: mode === 'system' ? '#000' : floodColor,
                 }}
                 initial={{ opacity: 1, y: 0, x: 0, rotate: 0 }}
                 animate={{
                   opacity: 0,
-                  y: 600 + Math.random() * 400,
+                  y: 500 + Math.random() * 300,
                   x: xDrift,
                   rotate: rotation,
                 }}
-                transition={{ duration: 0.6, delay, ease: 'easeIn' }}
+                transition={{ duration: 0.5, delay, ease: 'easeIn' }}
               />
             );
           })}
@@ -91,7 +91,7 @@ export default function WorldTransition() {
           style={{ background: floodColor }}
           initial={{ clipPath: 'circle(0% at 50% 50%)' }}
           animate={{ clipPath: 'circle(150% at 50% 50%)' }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
         />
       )}
 
@@ -102,7 +102,7 @@ export default function WorldTransition() {
           style={{ background: floodColor }}
           initial={{ opacity: 1 }}
           animate={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       )}
     </div>

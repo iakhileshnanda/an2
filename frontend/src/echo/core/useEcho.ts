@@ -91,10 +91,13 @@ export function useEcho() {
       window.innerWidth - displaySize - MARGIN,
       Math.round(window.innerWidth * 0.90 - displaySize)
     )
-    const dist =
+    const maxDist = Math.floor(window.innerWidth * 0.30)
+    const dist = Math.min(
       fsm.speed === 'fast' ? 120 + Math.random() * 80 :
       fsm.speed === 'slow' ? 20  + Math.random() * 40 :
-      50 + Math.random() * 80
+      50 + Math.random() * 80,
+      maxDist
+    )
     const targetX = clamp(
       posRef.current.x + (fsm.facingLeft ? -1 : 1) * dist,
       roamMinX, roamMaxX

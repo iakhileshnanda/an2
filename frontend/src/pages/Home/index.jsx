@@ -2,7 +2,8 @@ import React, { Suspense, lazy } from 'react'
 import Hero from '@sections/Hero'
 import Experience from '@sections/Experience'
 import Projects from '@sections/Projects'
-import Numbers from '@sections/Numbers'
+// TODO: replace Numbers with editorial outcomes (real project impact, not GitHub stats)
+// import Numbers from '@sections/Numbers'
 import HeroMark from '@components/HeroMark'
 import EchoRoot from '../../echo/EchoRoot'
 
@@ -21,7 +22,7 @@ export default function HomePage() {
         <Experience />
         <Projects />
         <AwakeningScene />
-        <Numbers />
+        {/* <Numbers /> */}
         <AskScene />
       </Suspense>
 

@@ -56,7 +56,7 @@
   --font-body: 'Spectral', serif;                    /* Body text, descriptions */
   --font-hover: 'Potta One', cursive;               /* Playful glimpse on hover */
   --font-mono: 'JetBrains Mono', monospace;          /* Terminal, code, labels, tags */
-  --font-editorial: 'Cormorant Garamond', serif;     /* Human mode chapters */
+  --font-editorial: 'Spectral', serif;               /* Human mode chapters */
   --font-system: 'Spectral', serif;                  /* Legacy alias — same as heading */
 
   /* ── FONT SIZES ── */

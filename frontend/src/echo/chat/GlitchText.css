@@ -18,22 +18,23 @@
   left: 0;
   width: 100%;
   color: var(--glitch-color, #1B1716);
-  /* must match the surrounding background for proper slice masking */
   background-color: var(--glitch-bg, #EDEBDE);
   overflow: hidden;
-  clip-path: inset(0 0 0 0);
+  /* Static slice — only top half shows on ::after, bottom half on ::before */
+  clip-path: inset(0 0 55% 0);
+  will-change: transform;
+}
+
+.glitch::before {
+  clip-path: inset(45% 0 0 0);
 }
 
 /* ── Always-on glitch ───────────────────────────────── */
 .glitch:not(.enable-on-hover)::after {
-  left: 2px;
-  text-shadow: var(--after-shadow, -2px 0 #810100);
-  animation: animate-glitch var(--after-duration, 3s) infinite linear alternate-reverse;
+  animation: glitch-shift-after var(--after-duration, 3s) infinite steps(6) alternate-reverse;
 }
 .glitch:not(.enable-on-hover)::before {
-  left: -2px;
-  text-shadow: var(--before-shadow, 2px 0 #0D1B2A);
-  animation: animate-glitch var(--before-duration, 2s) infinite linear alternate-reverse;
+  animation: glitch-shift-before var(--before-duration, 2s) infinite steps(6) alternate-reverse;
 }
 
 /* ── Hover-only glitch ──────────────────────────────── */
@@ -46,38 +47,30 @@
 .glitch.enable-on-hover:hover::after {
   content: attr(data-text);
   opacity: 1;
-  left: 2px;
-  text-shadow: var(--after-shadow, -2px 0 #810100);
-  animation: animate-glitch var(--after-duration, 3s) infinite linear alternate-reverse;
+  animation: glitch-shift-after var(--after-duration, 3s) infinite steps(6) alternate-reverse;
 }
 .glitch.enable-on-hover:hover::before {
   content: attr(data-text);
   opacity: 1;
-  left: -2px;
-  text-shadow: var(--before-shadow, 2px 0 #0D1B2A);
-  animation: animate-glitch var(--before-duration, 2s) infinite linear alternate-reverse;
+  animation: glitch-shift-before var(--before-duration, 2s) infinite steps(6) alternate-reverse;
 }
 
-@keyframes animate-glitch {
-  0%   { clip-path: inset(20% 0 50% 0); }
-  5%   { clip-path: inset(10% 0 60% 0); }
-  10%  { clip-path: inset(15% 0 55% 0); }
-  15%  { clip-path: inset(25% 0 35% 0); }
-  20%  { clip-path: inset(30% 0 40% 0); }
-  25%  { clip-path: inset(40% 0 20% 0); }
-  30%  { clip-path: inset(10% 0 60% 0); }
-  35%  { clip-path: inset(15% 0 55% 0); }
-  40%  { clip-path: inset(25% 0 35% 0); }
-  45%  { clip-path: inset(30% 0 40% 0); }
-  50%  { clip-path: inset(20% 0 50% 0); }
-  55%  { clip-path: inset(10% 0 60% 0); }
-  60%  { clip-path: inset(15% 0 55% 0); }
-  65%  { clip-path: inset(25% 0 35% 0); }
-  70%  { clip-path: inset(30% 0 40% 0); }
-  75%  { clip-path: inset(40% 0 20% 0); }
-  80%  { clip-path: inset(20% 0 50% 0); }
-  85%  { clip-path: inset(10% 0 60% 0); }
-  90%  { clip-path: inset(15% 0 55% 0); }
-  95%  { clip-path: inset(25% 0 35% 0); }
-  100% { clip-path: inset(30% 0 40% 0); }
+@keyframes glitch-shift-after {
+  0%   { transform: translate3d(2px, 0, 0); }
+  16%  { transform: translate3d(-2px, 1px, 0); }
+  33%  { transform: translate3d(3px, 0, 0); }
+  50%  { transform: translate3d(-1px, -1px, 0); }
+  66%  { transform: translate3d(2px, 1px, 0); }
+  83%  { transform: translate3d(-3px, 0, 0); }
+  100% { transform: translate3d(1px, 0, 0); }
+}
+
+@keyframes glitch-shift-before {
+  0%   { transform: translate3d(-2px, 0, 0); }
+  16%  { transform: translate3d(2px, -1px, 0); }
+  33%  { transform: translate3d(-3px, 0, 0); }
+  50%  { transform: translate3d(1px, 1px, 0); }
+  66%  { transform: translate3d(-2px, -1px, 0); }
+  83%  { transform: translate3d(3px, 0, 0); }
+  100% { transform: translate3d(-1px, 0, 0); }
 }
