@@ -1,30 +1,38 @@
 'use strict';
 
 const Anthropic = require('@anthropic-ai/sdk');
+const Groq = require('groq-sdk');
 const { buildSystemPrompt } = require('./systemPrompt');
 const { TOOL_DEFS, TOOL_IMPLS, TOOL_STATUS } = require('./tools');
 const { inferMode } = require('./modeInference');
 const memory = require('./memory');
 
-const MODEL = process.env.ECHO_MODEL || 'claude-opus-4-8';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const ANTHROPIC_MODEL = process.env.ECHO_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 1024;
 const MAX_TOOL_ROUNDS = 4;
 
-let client = null;
-function getClient() {
-  if (!client) client = new Anthropic(); // reads ANTHROPIC_API_KEY
-  return client;
+// Convert Anthropic-style tool defs to OpenAI format for Groq
+const GROQ_TOOL_DEFS = TOOL_DEFS.map((t) => ({
+  type: 'function',
+  function: { name: t.name, description: t.description, parameters: t.input_schema },
+}));
+
+let anthropicClient = null;
+function getAnthropic() {
+  if (!anthropicClient) anthropicClient = new Anthropic();
+  return anthropicClient;
 }
 
-// Frontend sends 'HIRE' | 'COLLAB' | 'CURIOUS' | null. Be liberal about what we
-// accept (older callers may send 'recruiting' etc.) and normalize.
+let groqClient = null;
+function getGroq() {
+  if (!groqClient) groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  return groqClient;
+}
+
 const INTENT_ALIASES = {
-  HIRE: 'HIRE',
-  COLLAB: 'COLLAB',
-  CURIOUS: 'CURIOUS',
-  recruiting: 'HIRE',
-  collaborating: 'COLLAB',
-  curious: 'CURIOUS',
+  HIRE: 'HIRE', COLLAB: 'COLLAB', CURIOUS: 'CURIOUS',
+  recruiting: 'HIRE', collaborating: 'COLLAB', curious: 'CURIOUS',
 };
 function normalizeIntent(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -39,30 +47,85 @@ function sanitizeHistory(history) {
     .map((m) => ({ role: m.role, content: m.content }));
 }
 
-function textFromContent(content) {
+function textFromAnthropicContent(content) {
   if (!Array.isArray(content)) return '';
-  return content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
-    .trim();
+  return content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
 }
 
-/**
- * Run the model with the tool loop. Returns the final reply text plus any tool
- * presentation data captured along the way.
- */
-async function runModel({ system, messages }) {
+// --- Groq tool loop (OpenAI-compatible) -------------------------------------
+
+async function runModelGroq({ system, messages }) {
+  // Build OpenAI-style message list: system + history
+  const convo = [
+    { role: 'system', content: system },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  let lastToolPayload = null;
+  let lastToolStatus = null;
+  let final = null;
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
+    const res = await getGroq().chat.completions.create({
+      model: GROQ_MODEL,
+      max_tokens: MAX_TOKENS,
+      tools: GROQ_TOOL_DEFS,
+      tool_choice: 'auto',
+      messages: convo,
+    });
+
+    const msg = res.choices[0].message;
+    const stopReason = res.choices[0].finish_reason;
+
+    if (stopReason === 'tool_calls' && Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
+      convo.push(msg);
+      const toolResults = [];
+
+      for (const tc of msg.tool_calls) {
+        if (tc.type !== 'function') continue;
+        const impl = TOOL_IMPLS[tc.function.name];
+        let result;
+        try {
+          const args = JSON.parse(tc.function.arguments || '{}');
+          result = impl ? await impl(args) : { error: `unknown tool ${tc.function.name}` };
+          if (!result.error) {
+            lastToolPayload = result;
+            lastToolStatus = TOOL_STATUS[tc.function.name] || null;
+          }
+        } catch (err) {
+          result = { error: String(err && err.message ? err.message : err) };
+        }
+        toolResults.push({
+          role: 'tool',
+          tool_call_id: tc.id,
+          content: JSON.stringify(result),
+        });
+      }
+
+      convo.push(...toolResults);
+      continue;
+    }
+
+    final = msg;
+    break;
+  }
+
+  const reply = final ? (final.content || '') : '';
+  return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
+}
+
+// --- Anthropic tool loop (fallback) -----------------------------------------
+
+async function runModelAnthropic({ system, messages }) {
   const convo = messages.slice();
   let lastToolPayload = null;
   let lastToolStatus = null;
   let final = null;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
-    const res = await getClient().messages.create({
-      model: MODEL,
+    const res = await getAnthropic().messages.create({
+      model: ANTHROPIC_MODEL,
       max_tokens: MAX_TOKENS,
-      output_config: { effort: 'low' },
       system,
       tools: TOOL_DEFS,
       messages: convo,
@@ -85,11 +148,7 @@ async function runModel({ system, messages }) {
         } catch (err) {
           result = { error: String(err && err.message ? err.message : err) };
         }
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: block.id,
-          content: JSON.stringify(result),
-        });
+        toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(result) });
       }
 
       convo.push({ role: 'user', content: toolResults });
@@ -100,15 +159,25 @@ async function runModel({ system, messages }) {
     break;
   }
 
-  const reply = final ? textFromContent(final.content) : '';
+  const reply = final ? textFromAnthropicContent(final.content) : '';
   return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
 }
 
-/**
- * Top-level handler for POST /api/echo.
- * @param {object} body request body (already JSON-parsed)
- * @returns {Promise<{reply,nextState,toolStatus?,structuredPayload?}>}
- */
+// --- Provider wrapper: Groq first, Anthropic fallback -----------------------
+
+async function runModel(opts) {
+  if (process.env.GROQ_API_KEY) {
+    try {
+      return await runModelGroq(opts);
+    } catch (err) {
+      console.warn('[echo] Groq failed, falling back to Anthropic:', err.message);
+    }
+  }
+  return runModelAnthropic(opts);
+}
+
+// --- Main handler -----------------------------------------------------------
+
 async function handleEcho(body = {}) {
   const {
     message,
@@ -143,8 +212,7 @@ async function handleEcho(body = {}) {
   if (isLeaving) {
     messages.push({
       role: 'user',
-      content:
-        '(system trigger: the visitor is leaving. Emit your one-line visit summary now, per the LEAVING instruction.)',
+      content: '(system trigger: the visitor is leaving. Emit your one-line visit summary now, per the LEAVING instruction.)',
     });
   } else {
     messages.push({ role: 'user', content: message });
@@ -152,7 +220,6 @@ async function handleEcho(body = {}) {
 
   const { reply, payload, toolStatus } = await runModel({ system, messages });
 
-  // Persist memory: record the turn, and on leaving store the summary line.
   if (visitorId) {
     await memory.recordTurn(visitorId, { sessionContext, intent: inferredMode, message });
     if (isLeaving && reply) await memory.writeSummary(visitorId, reply);
@@ -166,4 +233,4 @@ async function handleEcho(body = {}) {
   return out;
 }
 
-module.exports = { handleEcho, MODEL };
+module.exports = { handleEcho, GROQ_MODEL, ANTHROPIC_MODEL };

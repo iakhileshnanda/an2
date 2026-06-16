@@ -10,156 +10,140 @@ _Last updated: 2026-06-16._
 
 ## TL;DR
 
-Echo (the portfolio droid) now has a real brain. A new, self-contained backend
-service — `server/echo-api/` — gives it personality, per-visitor memory, real
-GitHub + résumé tool use, and behavioral mode inference. The old generic
-`/api/chat` route and its Kimi/Groq prompt are deleted. Frontend is wired to the
-new contract. The droid's visual/animation/FSM layer was **not** touched.
-
-Everything is built and locally verified **except the live Anthropic round-trip**,
-which needs an API key set on the machine. That's the one thing left to run
-end-to-end (the return-visit test).
+Echo is **fully live in production** at `https://deal.maya-ai.dev` and
+`https://v2.akhileshnanda.maya-ai.dev`. The backend runs on `:3005` under PM2,
+responses are working end-to-end via Groq. The only pending items are wiring
+`GITHUB_TOKEN` + `ANTHROPIC_API_KEY` into the env, and the return-visit memory
+test.
 
 ---
 
 ## What's done
 
-- **New backend service** `server/echo-api/` (Express, own port `3005`, own deps).
-  Single route: `POST /api/echo`.
-- **Personality** — fixed Echo system prompt (`src/systemPrompt.js`), dry/deadpan,
-  per the brief, with per-request memory/session/mode context layered on.
-- **Memory** — file-based, per `visitorId`, `data/visitors/<id>.json`
-  (`src/memory.js`). Path-traversal-guarded, serialized writes. Returning visitors
-  get prior context injected; the `trigger:"leaving"` call writes the visit summary.
-- **Real tools** (`src/tools.js`, Anthropic tool-use loop in `src/echo.js`):
-  - `get_github_activity` — live GitHub. **Authenticated** with `GITHUB_TOKEN`
-    (reads private repos via `/user/repos`), or public fallback for
-    `GITHUB_USERNAME`. Optional `query` searches/filters across **all** repos by
-    name/description/language/topic. Token is header-only — never echoed/logged.
-  - `get_resume` — reads `content/resume.json` fresh each call (edit it → answers
-    change, no restart). `RESUME_URL` env injected into the payload.
-- **Mode** — explicit `HIRE | COLLAB | CURIOUS`, or inferred from section dwell
-  times when intent is null (`src/modeInference.js`); ambiguous → Echo asks.
-- **Frontend integration** (data layer only, FSM untouched):
-  - `frontend/src/echo/core/visitor.ts` — persistent `visitorId` (localStorage),
-    per-load visit count, live `sectionDwellTimes`/`timeOnPage` from the store.
-  - `frontend/src/echo/chat/chatService.ts` — sends the full contract; maps UI
-    intents → `HIRE/COLLAB/CURIOUS`.
-  - `frontend/src/echo/chat/useChat.ts` — consumes new response shape; fires the
-    `leaving` visit-summary on close.
-  - `frontend/vite.config.js` — dev proxy `/api/echo` → `:3005`.
-- **Removals** — deleted `server/portfolio-api/routes/chat.js` (old prompt +
-  Kimi/Groq) and unregistered it. (`maya.js` still has its own Groq fallback —
-  separate recruiter-chat feature, intentionally left alone.)
-- **Deploy** — `nginx/portfolio-v2.conf` has a `location /api/echo` block →
-  `:3005` (longer prefix than `/api/` → nginx routes it there; 120s read timeout
-  for LLM latency).
+### Backend — `server/echo-api/`
+- Express service on port `3005`. Single route: `POST /api/echo`. Health: `GET /health`.
+- **LLM provider chain: Groq → Anthropic haiku fallback.**
+  - Primary: `llama-3.3-70b-versatile` via Groq (~700ms end-to-end, 33ms model compute).
+  - Fallback: `claude-haiku-4-5-20251001` via Anthropic (fires only if Groq errors).
+  - Two separate tool loops: Groq uses OpenAI format, Anthropic uses its own — both in `src/echo.js`.
+- **Personality** — fixed system prompt (`src/systemPrompt.js`), dry/deadpan per the brief.
+- **Memory** — file-based per `visitorId` at `data/visitors/<id>.json` (`src/memory.js`).
+  Returning visitors get prior context injected; `trigger:"leaving"` writes the visit summary.
+- **Tools** (`src/tools.js`):
+  - `get_github_activity` — live GitHub, authenticated with `GITHUB_TOKEN` (private repos) or
+    public fallback. Token is header-only, never logged or returned.
+  - `get_resume` — reads `content/resume.json` fresh every call (edit → live, no restart).
+- **Mode inference** — `HIRE | COLLAB | CURIOUS` from explicit intent or section dwell times.
 
-## Verified locally
+### Infrastructure
+- **PM2**: `echo-api` (id 7) running, state persisted with `pm2 save`.
+- **nginx**: `portfolio-v2` site enabled, serves `deal.maya-ai.dev` + `v2.akhileshnanda.maya-ai.dev`.
+  `location /api/echo → :3005` with 120s read timeout for LLM latency.
+- **Deploy script**: `./deploy.sh` from repo root — pulls, installs, builds, copies nginx conf,
+  reloads nginx, restarts PM2, runs health checks. One command to ship.
+- **ALLOWED_ORIGINS**: both prod domains set in `server/echo-api/.env`.
+- **NVIDIA_API_KEY** stored in `/home/ubuntu/apps/.env` for future use (inference is blocked
+  from Oracle Cloud egress — works fine from local machines).
 
-- Backend unit tests: mode inference, new-vs-returning prompt building, memory
-  round-trip (visit-count bump, section accumulation, summary persistence,
-  traversal guard). All pass.
-- Real tool data: GitHub tool returns live stats; résumé tool reads the file.
-- Unauthenticated GitHub fallback + `query` filtering work.
-- Frontend builds clean (`npm run build`).
-- `.env` confirmed gitignored; token never logged.
+### Frontend
+- Built and serving from `frontend/dist/`.
+- `visitor.ts` — persistent `visitorId`, visit count, dwell times.
+- `chatService.ts` — sends full contract to `/api/echo`.
+- `useChat.ts` — handles response shape, fires `leaving` summary on chat close.
+- Vite dev proxy: `/api/echo → :3005`.
 
-## NOT yet done / pending
-
-- **Live Anthropic call** — no `ANTHROPIC_API_KEY` was available in the build
-  env, so `handleEcho` → model round-trip is wired but unrun. **This is the main
-  open item** (see "Return-visit test" below).
-- **`structuredPayload` / `toolStatus` are returned but not rendered.** The FSM
-  `PRESENTING` state is locked/unused, so the real tool data currently lands in
-  Echo's text `reply`. Wiring a PRESENTING UI card is deliberate future scope.
-- **Production process management** — no PM2/systemd entry added for echo-api yet
-  (see Deploy).
+### Domains
+| Domain | Serves |
+|---|---|
+| `deal.maya-ai.dev` | v2 portfolio + Echo (primary) |
+| `v2.akhileshnanda.maya-ai.dev` | same |
+| `akhileshnanda.maya-ai.dev` | original v1 portfolio — untouched |
 
 ---
 
-## Run it
+## Pending / What's left
+
+### Must-do
+1. **`GITHUB_TOKEN`** — add a classic PAT (`repo` scope) to `server/echo-api/.env`.
+   Without it Echo can only see public repos. With it, private repo names/descriptions
+   become reachable via Echo's replies — intentional, just be aware.
+2. **`ANTHROPIC_API_KEY`** — add to `server/echo-api/.env` for the Groq fallback.
+   Groq handles all load; this only fires if Groq goes down.
+3. **Return-visit memory test** — open the site, chat with Echo, close (fires `leaving`
+   summary → writes `data/visitors/<id>.json`), reload the page, open Echo again.
+   Its opening line must reference the prior visit. That's PRD done-criterion #2.
+   Currently unverified because GITHUB_TOKEN isn't set yet.
+
+### Future scope (deliberate deferrals)
+- **PRESENTING tool-card UI** — `structuredPayload` and `toolStatus` are returned by the
+  API but not rendered in the frontend. Real GitHub/resume data shows up in Echo's text
+  reply for now. Wiring a card requires an FSM transition into `PRESENTING` — coordinate
+  before touching the FSM.
+- **NVIDIA NIM** — key stored, but Oracle Cloud blocks outbound POST to NVIDIA's inference
+  backend. Would work from any non-Oracle host. Add as a third provider tier when needed.
+
+---
+
+## Deploy
 
 ```bash
-# 1. Backend brain
-cd server/echo-api
-cp .env.example .env          # set ANTHROPIC_API_KEY (required) and GITHUB_TOKEN (for private repos)
-npm install
-npm run dev                   # listens on :3005
-
-# 2. Frontend (separate terminal)
-cd frontend
-npm install
-npm run dev                   # vite proxies /api/echo -> :3005, rest -> :3001
+cd ~/apps/newakhilesh
+./deploy.sh        # pull → install → build → nginx reload → pm2 restart → health check
 ```
 
-Required env (see `server/echo-api/.env.example`): `ANTHROPIC_API_KEY`.
-Useful: `ECHO_MODEL` (default `claude-opus-4-8`; `claude-sonnet-4-6` is
-faster/cheaper), `GITHUB_TOKEN` (classic PAT w/ `repo` scope → private repos),
-`GITHUB_USERNAME`, `RESUME_URL`, `PORT`, `ALLOWED_ORIGINS`.
-
-> Heads-up: with `GITHUB_TOKEN` set, private repo **names/descriptions/topics**
-> become reachable through Echo's replies to site visitors. That's the requested
-> behavior — just be aware anything in those fields is effectively public via Echo.
-
-## Return-visit test (the end-to-end check that's left)
-
-1. Set `ANTHROPIC_API_KEY` (and optionally `GITHUB_TOKEN`) in `server/echo-api/.env`.
-2. Run backend + frontend. Open the site, click Echo, pick an intent, chat,
-   ask "what's he building lately?" (should trigger the GitHub tool with real data).
-3. Close the chat (fires the `leaving` summary → writes
-   `server/echo-api/data/visitors/<id>.json`).
-4. Reload the page (same browser = same `visitorId`, `visit_count` increments)
-   and open Echo again. Its opening line should reference the prior visit —
-   **demonstrably different from the first-time greeting.** That's PRD done-criterion #2.
-
-## Contract (`POST /api/echo`)
-
-Request: `{ message, history, intent, visitorId, sessionContext, trigger? }`
-Response: `{ reply, nextState, toolStatus?, structuredPayload? }`
-Full shape in `server/echo-api/README.md`.
+For env-only changes (new key, model swap) — no rebuild needed:
+```bash
+pm2 restart echo-api --update-env
+```
 
 ---
 
-## Deploy notes
+## Env reference — `server/echo-api/.env`
 
-- nginx block is in place (`nginx/portfolio-v2.conf`, `location /api/echo` →
-  `localhost:3005`). Reload nginx after deploying.
-- **Still needed in prod:** run echo-api under a process manager. The repo uses
-  PM2 elsewhere (`server/portfolio-api/ecosystem.config.js`) — add an app entry
-  (`cwd: server/echo-api`, `script: index.js`) or a standalone PM2 start, and set
-  its env (`ANTHROPIC_API_KEY`, `GITHUB_TOKEN`, `ALLOWED_ORIGINS=https://v2...`).
-- Prod portfolio-api runs on `:3002` in this config; echo-api is `:3005` — no clash.
+| Key | Status | Notes |
+|---|---|---|
+| `GROQ_API_KEY` | ✅ set | Primary LLM. From `/home/ubuntu/apps/.env`. |
+| `GROQ_MODEL` | ✅ set | `llama-3.3-70b-versatile` |
+| `ECHO_MODEL` | ✅ set | `claude-haiku-4-5-20251001` (Anthropic fallback) |
+| `ANTHROPIC_API_KEY` | ⚠ placeholder | Add when available |
+| `GITHUB_TOKEN` | ⚠ empty | Add classic PAT with `repo` scope |
+| `GITHUB_USERNAME` | ✅ set | `iakhileshnanda` |
+| `PORT` | ✅ set | `3005` |
+| `NODE_ENV` | ✅ set | `production` |
+| `ALLOWED_ORIGINS` | ✅ set | Both prod domains |
+
+---
 
 ## File map
 
 ```
-server/echo-api/
-├── index.js                # express app, /api/echo, /health, CORS, rate limit
-├── src/echo.js             # orchestrator: memory + Anthropic tool loop
-├── src/systemPrompt.js     # Echo persona + dynamic context builder
-├── src/tools.js            # get_github_activity (auth + private + search), get_resume
-├── src/memory.js           # per-visitor JSON store
-├── src/modeInference.js    # dwell-based HIRE/CURIOUS inference
-├── content/resume.json     # structured résumé (edit freely, hot-read)
-├── .env.example  .gitignore  README.md  package.json
-└── data/visitors/          # runtime, gitignored
-
-frontend/src/echo/
-├── core/visitor.ts         # visitorId + session-context tracker (NEW)
-├── chat/chatService.ts     # new contract (MODIFIED)
-└── chat/useChat.ts         # new response shape + leaving summary (MODIFIED)
-
-nginx/portfolio-v2.conf     # /api/echo -> :3005 (MODIFIED)
+newakhilesh/
+├── deploy.sh                   # one-command deploy
+├── nginx/portfolio-v2.conf     # /api/echo -> :3005, /api/ -> :3002
+│
+├── server/echo-api/
+│   ├── index.js                # express app, CORS, rate limit
+│   ├── src/echo.js             # Groq-primary + Anthropic-fallback tool loops
+│   ├── src/systemPrompt.js     # Echo persona + dynamic context builder
+│   ├── src/tools.js            # get_github_activity, get_resume
+│   ├── src/memory.js           # per-visitor JSON store
+│   ├── src/modeInference.js    # dwell-based mode inference
+│   ├── content/resume.json     # hot-read résumé (edit freely)
+│   ├── .env                    # secrets — gitignored
+│   └── data/visitors/          # runtime memory — gitignored
+│
+└── frontend/
+    ├── dist/                   # built output served by nginx
+    └── src/echo/
+        ├── core/visitor.ts     # visitorId + session context
+        ├── chat/chatService.ts # API contract
+        └── chat/useChat.ts     # response handler + leaving summary
 ```
 
-## Notes for whoever continues
+## Hard rules (don't break these)
 
-- Do **not** edit the droid's FSM/animation/visual layer (`echo/core/EchoFSM.ts`,
-  `echo/character/*`, sprite logic) — locked by the brief.
-- To make the PRESENTING tool-card real: it needs an FSM transition into
-  `PRESENTING` plus a render path for `structuredPayload`. Both are intentionally
-  deferred (FSM is locked) — coordinate before touching the FSM.
-- `server/portfolio-api/routes/maya.js` still contains Kimi/Groq fallback code for
-  the separate "Maya" recruiter chat. Out of Echo's scope; leave unless that
-  feature is being retired too.
+- Do **not** touch `echo/core/EchoFSM.ts` or `echo/character/*` — FSM and sprite
+  layer are locked.
+- Do **not** touch `~/apps/nanobot` — Telegram bot, separate system, working fine.
+- `server/portfolio-api/routes/maya.js` has its own Groq-based recruiter chat ("Maya").
+  Separate feature, leave it alone unless explicitly retiring it.
