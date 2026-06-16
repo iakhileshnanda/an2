@@ -1,0 +1,67 @@
+{
+  "name": "Akhilesh Nanda",
+  "title": "Frontend Lead / AI Systems Builder",
+  "location": "Bangalore, India",
+  "summary": "Frontend lead turned AI systems builder. Started as a mechanical engineer with zero programming background, self-taught into production frontend, led enterprise Angular at scale, then moved into AI agents, knowledge graphs, and multi-agent simulation. Builds the thing, not the slide deck.",
+  "availability": "Open to senior frontend, AI engineering, and founding-team roles.",
+  "contact": {
+    "email": "theakhilesh.m@gmail.com",
+    "github": "https://github.com/iakhileshnanda",
+    "linkedin": "https://linkedin.com/in/akhileshnanda"
+  },
+  "skills": {
+    "frontend": ["Angular (2-19)", "TypeScript", "RxJS", "NgRx", "D3.js", "real-time dashboards"],
+    "ai": ["LLM agents", "RAG / GraphRAG", "multi-agent systems", "Neo4j", "MCP toolkits", "vector DBs"],
+    "backend": ["Node.js", "NestJS", "PostgreSQL", "API design"]
+  },
+  "experience": [
+    {
+      "period": "2024 - present",
+      "title": "AI Systems Builder",
+      "company": "Independent",
+      "notes": "Multi-agent systems, knowledge graphs, simulation engines. Built Maya MIRO, the FORGE MCP toolkit, and NanoBot."
+    },
+    {
+      "period": "2021 - 2024",
+      "title": "Frontend Lead",
+      "company": "ValueLabs (Enterprise)",
+      "notes": "Led frontend for enterprise Angular 19 dashboards, real-time data viz with D3.js, mentored junior devs. The person they called when the UI broke at 2 AM."
+    },
+    {
+      "period": "2019 - 2021",
+      "title": "Junior Developer",
+      "company": "ValueLabs",
+      "notes": "Walked in with no CS background, self-taught while working full-time, shipped first production frontend within 6 months."
+    },
+    {
+      "period": "2018 - 2019",
+      "title": "Quality Control Inspector",
+      "company": "Omni Matrix",
+      "notes": "Mechanical engineering: CATIA, ANSYS, factory-floor QA. The other life, before code."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Maya MIRO",
+      "blurb": "Multi-agent market simulation — hundreds of AI investor personas debate on a simulated social feed to predict sentiment.",
+      "stack": ["Python", "Neo4j", "NVIDIA NIM", "GraphRAG", "CAMEL-OASIS"],
+      "link": "https://github.com/iakhileshnanda/myMayaMIRO"
+    },
+    {
+      "name": "Oracle",
+      "blurb": "AI job-hunting agent that scrapes, matches, and applies autonomously.",
+      "stack": ["Node.js", "MCP", "AI Agents", "Puppeteer"]
+    },
+    {
+      "name": "NanoBot",
+      "blurb": "Personal AI assistant trained on his life, skills, and philosophy.",
+      "stack": ["LLM", "RAG", "NestJS", "Vector DB"]
+    },
+    {
+      "name": "FORGE",
+      "blurb": "MCP server toolkit — 6 tools for AI agent orchestration.",
+      "stack": ["MCP", "TypeScript", "SDK"]
+    }
+  ],
+  "resumeUrl": null
+}

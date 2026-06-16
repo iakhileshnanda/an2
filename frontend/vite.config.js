@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Echo's brain runs as its own service — most specific prefix first.
+      '/api/echo': 'http://localhost:3005',
       '/api': 'http://localhost:3001',
       '/health': 'http://localhost:3001',
     },

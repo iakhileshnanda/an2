@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useEchoStore } from '../store/echoStore'
 import { sendToEcho } from './chatService'
 import type { ChatMessage, EchoIntent, HistoryItem } from './chatService'
@@ -20,6 +20,10 @@ export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const history = useRef<HistoryItem[]>([])
+
+  // Mirror intent in a ref so reset() can read it without being re-created.
+  const intentRef = useRef<EchoIntent | null>(null)
+  useEffect(() => { intentRef.current = intent }, [intent])
 
   const pushEcho = (text: string): ChatMessage => {
     const msg: ChatMessage = { id: uid(), role: 'echo', text }
@@ -43,7 +47,7 @@ export function useChat() {
     try {
       const seed = INTENT_SEED[chosen]
       history.current = [{ role: 'user', content: seed }]
-      const reply = await sendToEcho(seed, [], chosen)
+      const { reply } = await sendToEcho(seed, [], chosen)
       pushEcho(reply)
       dispatch({ type: 'REPLY_RECEIVED' })
     } catch {
@@ -65,7 +69,7 @@ export function useChat() {
     dispatch({ type: 'MESSAGE_SENT' })
 
     try {
-      const reply = await sendToEcho(text, prevHistory, intent)
+      const { reply } = await sendToEcho(text, prevHistory, intent)
       pushEcho(reply)
       dispatch({ type: 'REPLY_RECEIVED' })
     } catch {
@@ -77,6 +81,13 @@ export function useChat() {
   }, [dispatch, intent])
 
   const reset = useCallback(() => {
+    // On close, fire a one-line "visit summary" trigger. This is the proactive
+    // LEAVING write: the backend produces a summary and stores it as memory for
+    // the visitor's next session. Fire-and-forget — the panel is closing.
+    const lastIntent = intentRef.current
+    if (lastIntent && lastIntent !== 'roaming' && history.current.length > 0) {
+      sendToEcho('', history.current, lastIntent, { trigger: 'leaving' }).catch(() => {})
+    }
     setIntent(null)
     setMessages([])
     setIsLoading(false)

@@ -7,7 +7,6 @@ const { apiLimiter } = require('./middleware/rateLimit');
 const errorHandler = require('./middleware/errorHandler');
 const { initWs } = require('./realtime');
 
-const chatRoute = require('./routes/chat');
 const statsRoute = require('./routes/stats');
 const jobsRoute = require('./routes/jobs');
 const resumeRoute = require('./routes/resume');
@@ -38,7 +37,6 @@ app.get('/health', (req, res) => {
 // Routes with rate limiting
 app.use('/api', apiLimiter);
 app.use('/api/maya', mayaRoute);
-app.use('/api/chat', chatRoute);
 app.use('/api/stats', statsRoute);
 app.use('/api/jobs', jobsRoute);
 app.use('/api/resume', resumeRoute);
