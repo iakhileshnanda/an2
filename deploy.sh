@@ -55,17 +55,14 @@ ok "nginx reloaded"
 # ── 5. Restart PM2 processes ─────────────────────────────────────────────────
 step "Restarting PM2 processes"
 
-# portfolio-api
-if pm2 describe portfolio-api > /dev/null 2>&1; then
-  pm2 restart portfolio-api --update-env
-  ok "portfolio-api restarted"
+# portfolio-api-v2 (newakhilesh, port 3002)
+if pm2 describe portfolio-api-v2 > /dev/null 2>&1; then
+  pm2 restart portfolio-api-v2 --update-env
+  ok "portfolio-api-v2 restarted"
 else
   cd "$PORTFOLIO_API_DIR"
-  pm2 start index.js --name portfolio-api \
-    --log /home/ubuntu/logs/api-v2-out.log \
-    --error /home/ubuntu/logs/api-v2-error.log \
-    --max-memory-restart 200M
-  ok "portfolio-api started"
+  pm2 start ecosystem.config.js
+  ok "portfolio-api-v2 started"
 fi
 
 # echo-api
