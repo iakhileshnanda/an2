@@ -4,7 +4,6 @@ import useStore from '@store/useStore';
 import Nav from '@components/nav/Nav';
 import FilmGrain from '@components/FilmGrain';
 import WorldTransition from '@components/transition/WorldTransition';
-import GestureZones from '@components/gesture/GestureZones';
 
 const HomePage = lazy(() => import('@pages/Home'));
 const HumanPage = lazy(() => import('@pages/Human'));
@@ -52,7 +51,6 @@ function App() {
         </Routes>
       </Suspense>
 
-      <GestureZones />
     </div>
   );
 }

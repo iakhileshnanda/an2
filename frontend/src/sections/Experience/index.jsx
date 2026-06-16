@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import anime from 'animejs';
 import experience from '@content/experience.json';
 import styles from './Experience.module.css';
+import CurrentlyBuilding from '@components/CurrentlyBuilding';
 
 const springConfig = { stiffness: 80, damping: 20, mass: 0.5 };
 
@@ -129,7 +130,7 @@ export default function Experience() {
             transition={{ duration: 0.7, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <TypingPhrase />
-            <div className="flex items-baseline gap-4">
+            <div className="flex items-baseline gap-4 mb-8">
               <span className="font-monument text-5xl md:text-7xl text-[#1B1716]">
                 {dayCount.toLocaleString()}
               </span>
@@ -137,6 +138,7 @@ export default function Experience() {
                 days building
               </span>
             </div>
+            <CurrentlyBuilding />
           </motion.div>
         </div>
       </div>
