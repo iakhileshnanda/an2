@@ -1,9 +1,6 @@
-# Portfolio V2 — newakhilesh/
+# newakhilesh — Portfolio V2
 
-Independent sandbox for redesigning akhileshnanda.maya-ai.dev.
-
-The production portfolio continues to run untouched at `../` (root).
-This directory is a complete, decoupled clone.
+Live at `deal.maya-ai.dev` and `v2.akhileshnanda.maya-ai.dev`.
 
 ---
 
@@ -11,54 +8,62 @@ This directory is a complete, decoupled clone.
 
 ```
 newakhilesh/
-├── frontend/          React 19 + Vite + TailwindCSS
+├── frontend/               React 19 + Vite + TailwindCSS
 │   ├── src/
-│   │   ├── system/    6-scene System World (AI/terminal mode)
-│   │   ├── human/     7-chapter Human World (story mode)
-│   │   ├── components/
-│   │   ├── nanobot/   NanoBot prep (sprites, hooks, state — not wired yet)
-│   │   ├── styles/    tokens.css, global.css, fonts.css
-│   │   └── store/     Zustand global state
-│   └── public/        favicon, icons, OG image
+│   │   ├── echo/           Echo AI companion (FSM, chat, store, visitor tracking)
+│   │   │   ├── core/       EchoFSM.ts, useEcho.ts, visitor.ts, types.ts, constants.ts
+│   │   │   ├── chat/       chatService.ts, useChat.ts
+│   │   │   ├── store/      echoStore.ts
+│   │   │   └── content/    hints.ts
+│   │   ├── store/          Zustand global state
+│   │   └── lib/            parseAboutMe.ts
+│   └── public/             favicon, icons, OG image, droid sprite
+│
 ├── server/
-│   └── portfolio-api/ Express API (port 3002 in V2)
-│       ├── routes/    chat, maya, recruiterChat, about, stats, jobs, resume, contact
-│       ├── middleware/ cors, rateLimit, errorHandler
-│       ├── prompts/   portfolio.js, lab.js
-│       └── utils/     parseAboutMe.js, aboutStore.js
+│   ├── echo-api/           Echo brain — port 3005, PM2 name: echo-api
+│   │   ├── index.js        Express, CORS, rate limit
+│   │   ├── src/
+│   │   │   ├── echo.js     Groq-primary + Anthropic-fallback tool loops
+│   │   │   ├── systemPrompt.js  Echo persona + dynamic context builder
+│   │   │   ├── tools.js    get_github_activity, get_resume
+│   │   │   ├── memory.js   per-visitor JSON store
+│   │   │   └── modeInference.js  dwell-based HIRE/CURIOUS inference
+│   │   ├── content/
+│   │   │   └── resume.json  hot-read résumé (edit = live, no restart needed)
+│   │   └── data/visitors/  runtime memory, gitignored
+│   │
+│   └── portfolio-api/      Legacy API — port 3002, PM2 name: portfolio-api-v2
+│       └── routes/         about, contact, stats, maya (recruiter chat)
+│
 ├── nginx/
-│   └── portfolio-v2.conf   (v2.akhileshnanda.maya-ai.dev, port 3002)
+│   └── portfolio-v2.conf   /api/echo → :3005, /api/ → :3002, frontend dist
 ├── deploy/
-│   ├── deploy.sh      git pull → build → pm2 restart → nginx reload
-│   └── install.sh     first-time server setup
-├── content/           editorial JSON + knowledge.md (not wired yet)
-│   ├── hero.json
-│   ├── projects.json
-│   ├── experience.json
-│   ├── stats.json
-│   ├── contact.json
-│   └── knowledge.md
-├── docs/
-│   ├── current-system-audit.md   complete audit of production system
-│   ├── current-architecture.md
-│   ├── roadmap.md
-│   └── ...
-├── assets/            global static assets
-├── about-me.md        V2 content source of truth (copy of production)
-└── droid_00_32x32/    original droid sprite source files
+│   ├── deploy.sh           git pull → install → build → nginx reload → pm2 restart
+│   └── install.sh          first-time server setup
+├── deploy.sh               root-level shortcut (calls deploy/)
+├── content/                editorial JSON (hero, projects, experience, skills, stats, contact)
+├── about-me.md             content source of truth
+└── docs/                   architecture and planning docs
 ```
 
 ---
 
-## Key Differences from Production
+## Domains
 
-| Setting | Production | V2 |
-|---------|-----------|-----|
-| PM2 name | `portfolio-api` | `portfolio-api-v2` |
-| API port | 3001 | 3002 |
-| Domain | `akhileshnanda.maya-ai.dev` | `v2.akhileshnanda.maya-ai.dev` |
-| Nginx config | `portfolio.conf` | `portfolio-v2.conf` |
-| about-me path | `akhileshnanda/about-me.md` | `newakhilesh/about-me.md` |
+| Domain | Serves |
+|--------|--------|
+| `deal.maya-ai.dev` | V2 portfolio + Echo (primary) |
+| `v2.akhileshnanda.maya-ai.dev` | same |
+| `akhileshnanda.maya-ai.dev` | original V1 portfolio — untouched |
+
+---
+
+## Services
+
+| Service | PM2 name | Port | What it does |
+|---------|----------|------|--------------|
+| Echo API | `echo-api` | 3005 | Echo's brain — LLM, memory, tools |
+| Portfolio API | `portfolio-api-v2` | 3002 | Stats, contact, Maya recruiter chat |
 
 ---
 
@@ -68,47 +73,34 @@ newakhilesh/
 # Frontend
 cd frontend
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173 — /api/echo proxies to :3005
 
-# Backend
-cd server/portfolio-api
-cp .env.example .env
-# fill in API keys
-node index.js      # http://localhost:3002
+# Echo API
+cd server/echo-api
+cp .env.example .env   # set GROQ_API_KEY + ANTHROPIC_API_KEY
+npm install
+npm start              # http://localhost:3005
 ```
 
-Frontend dev proxy already configured in `vite.config.js` to forward `/api` to `:3001`.
-Change to `:3002` for V2 standalone dev.
+---
+
+## Deploy
+
+```bash
+cd ~/apps/newakhilesh
+./deploy.sh   # pull → install → build → nginx reload → pm2 restart → health check
+```
+
+Env-only changes (new key, model swap):
+```bash
+pm2 restart echo-api --update-env
+```
 
 ---
 
-## NanoBot (Prepared, Not Wired)
+## Key docs
 
-Sprite assets live at `frontend/src/nanobot/sprites/`.
-Scaffold directories created at `frontend/src/nanobot/`:
-- `components/` — React components
-- `hooks/` — custom hooks
-- `sprites/` — all droid image assets
-- `animations/` — animation definitions
-- `state/` — FSM and state management
-
-Implementation starts after V2 design is approved.
-
----
-
-## Content System (Prepared, Not Wired)
-
-`content/` holds JSON files for each section and `knowledge.md` as editorial source.
-Not yet wired into components — will be connected during V2 development.
-
----
-
-## Production Safety
-
-Nothing in this directory is referenced by or affects:
-- `../frontend/` (production frontend)
-- `../server/` (production API)
-- `../nginx/` (production nginx)
-- `../deploy.sh` (production deploy)
-
-The production site continues running exactly as-is.
+- `ECHO_HANDOFF.md` — Echo status, pending items, hard rules
+- `server/echo-api/README.md` — Echo API contract reference
+- `docs/admin-architecture.md` — Admin mode design (future)
+- `docs/dashboard-architecture.md` — Real-time dashboard design (future)
