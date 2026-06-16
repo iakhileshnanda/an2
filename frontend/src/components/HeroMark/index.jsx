@@ -110,16 +110,21 @@ export default function HeroMark() {
       }
     }
 
-    // Measure on next frame so the font has a chance to load
+    // Measure immediately so posRef is valid before any scroll fires.
+    // The rAF below re-measures after fonts may have loaded (self-hosted
+    // PastorOfMuppets is ready, but JetBrains Mono is now non-blocking).
+    measure()
+
     const frameId = requestAnimationFrame(() => {
       measure()
       // Entry animation: scale 8→1, opacity 0→1
-      // Runs once after measurement, before any scroll
       animate(entryScaleMV, 1, { duration: 0.9, ease: [0.22, 1, 0.36, 1] })
       animate(entryOpacityMV, 1, { duration: 0.5, ease: 'easeOut', delay: 0.15 })
     })
 
     window.addEventListener('resize', measure)
+    // Re-measure if fonts swap in after the initial rAF (non-blocking Google Fonts)
+    document.fonts?.ready.then(measure)
     return () => {
       cancelAnimationFrame(frameId)
       window.removeEventListener('resize', measure)
