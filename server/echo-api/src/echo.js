@@ -4,7 +4,6 @@ const Anthropic = require('@anthropic-ai/sdk');
 const Groq = require('groq-sdk');
 const { buildSystemPrompt } = require('./systemPrompt');
 const { TOOL_DEFS, TOOL_IMPLS, TOOL_STATUS } = require('./tools');
-const { inferMode } = require('./modeInference');
 const memory = require('./memory');
 
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
@@ -28,15 +27,6 @@ let groqClient = null;
 function getGroq() {
   if (!groqClient) groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY });
   return groqClient;
-}
-
-const INTENT_ALIASES = {
-  HIRE: 'HIRE', COLLAB: 'COLLAB', CURIOUS: 'CURIOUS',
-  recruiting: 'HIRE', collaborating: 'COLLAB', curious: 'CURIOUS',
-};
-function normalizeIntent(raw) {
-  if (!raw || typeof raw !== 'string') return null;
-  return INTENT_ALIASES[raw] || INTENT_ALIASES[raw.toUpperCase()] || null;
 }
 
 function sanitizeHistory(history) {
@@ -182,7 +172,6 @@ async function handleEcho(body = {}) {
   const {
     message,
     history = [],
-    intent: rawIntent = null,
     visitorId = null,
     sessionContext = {},
     trigger = null,
@@ -201,12 +190,10 @@ async function handleEcho(body = {}) {
     throw err;
   }
 
-  const intent = normalizeIntent(rawIntent);
   const stored = visitorId ? await memory.load(visitorId) : null;
   const returning = !!stored && ((Number(sessionContext.visitCount) || 1) > 1 || !!stored.lastVisitSummary);
-  const inferredMode = intent || inferMode(sessionContext.sectionDwellTimes || {});
 
-  const system = buildSystemPrompt({ stored, returning, intent, inferredMode, sessionContext, trigger });
+  const system = buildSystemPrompt({ stored, returning, sessionContext, trigger });
 
   const messages = sanitizeHistory(history);
   if (isLeaving) {
@@ -221,7 +208,7 @@ async function handleEcho(body = {}) {
   const { reply, payload, toolStatus } = await runModel({ system, messages });
 
   if (visitorId) {
-    await memory.recordTurn(visitorId, { sessionContext, intent: inferredMode, message });
+    await memory.recordTurn(visitorId, { sessionContext, message });
     if (isLeaving && reply) await memory.writeSummary(visitorId, reply);
   }
 

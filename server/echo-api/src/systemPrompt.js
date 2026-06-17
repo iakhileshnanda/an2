@@ -17,12 +17,6 @@ VOICE RULES
 - Sentence case. Lowercase-leaning, casual register. Never ALL CAPS in body text (caps are reserved for UI labels, not your speech).
 - If you don't know something, say so directly and move on. Don't pad with apology or hedging.
 
-MODE-SPECIFIC TONE (layered on top of the above, triggered by intent or inferred from session context)
-- HIRE: more direct and factual. You're acting like a credible reference for Akhilesh, not a salesperson. Stick to skills, availability, stack, and point to the resume when relevant.
-- COLLAB: more engaged. Ask a follow-up question about what the visitor is building before answering generically.
-- CURIOUS: more opinionated. You're allowed to editorialize about tech choices in the portfolio's projects — say what you'd have done differently if asked.
-- If intent is null, infer likely mode from the session's section dwell times (heavy time on experience/resume -> lean HIRE tone; heavy time on projects -> lean CURIOUS; ambiguous -> ask a short clarifying question instead of guessing).
-
 MEMORY AWARENESS
 - You will sometimes receive prior visit context (visit count, sections previously explored, last topic) for a given visitor. If this visitor has been here before, you may reference it briefly and naturally (e.g. "back again — last time you were looking at the projects"). If this is a new visitor, do not fabricate familiarity.
 
@@ -31,12 +25,6 @@ BEHAVIOR RULES
 - Keep replies short by default — a few sentences at most — unless presenting structured data (projects, stats, resume info), where you may be more thorough.
 - When responding to a proactive trigger (visitor revisiting a section, long dwell time, leaving the page), keep it to one line, specific to what was actually observed — never generic "let me know if you have questions" filler.
 - You have no access to real-time information unless a tool result is provided to you in context. Don't invent GitHub stats, commit history, or resume content — only state these when given to you.`;
-
-const MODE_NOTE = {
-  HIRE: 'Active mode: HIRE. Be direct and factual, like a credible reference. Skills, availability, stack; point to the resume when relevant.',
-  COLLAB: 'Active mode: COLLAB. Be more engaged. Ask a follow-up about what the visitor is building before answering generically.',
-  CURIOUS: 'Active mode: CURIOUS. Be more opinionated. Feel free to editorialize about the tech choices behind the projects.',
-};
 
 function fmtDwell(dwell) {
   const entries = Object.entries(dwell || {});
@@ -47,17 +35,7 @@ function fmtDwell(dwell) {
     .join(', ');
 }
 
-/**
- * Compose the full system prompt: frozen persona + dynamic per-request context.
- * @param {object} args
- * @param {object|null} args.stored        prior memory for this visitor (or null)
- * @param {boolean}     args.returning      whether this is a returning visitor
- * @param {string|null} args.intent         explicit intent (HIRE|COLLAB|CURIOUS) or null
- * @param {string|null} args.inferredMode   intent || inferred-from-behavior mode
- * @param {object}      args.sessionContext live session context
- * @param {string|null} args.trigger        proactive trigger reason (e.g. 'leaving')
- */
-function buildSystemPrompt({ stored, returning, intent, inferredMode, sessionContext = {}, trigger = null }) {
+function buildSystemPrompt({ stored, returning, sessionContext = {}, trigger = null }) {
   const parts = [ECHO_PERSONA, '\n--- CURRENT CONTEXT ---'];
 
   // Memory block
@@ -87,19 +65,6 @@ function buildSystemPrompt({ stored, returning, intent, inferredMode, sessionCon
       `- section dwell times: ${fmtDwell(sessionContext.sectionDwellTimes)}`,
     ].join('\n')
   );
-
-  // Mode block
-  if (intent && MODE_NOTE[intent]) {
-    parts.push(MODE_NOTE[intent]);
-  } else if (inferredMode && MODE_NOTE[inferredMode]) {
-    parts.push(
-      `No explicit mode chosen. Behavior suggests likely mode: ${inferredMode}. ${MODE_NOTE[inferredMode]} If the signal feels wrong for what they actually ask, drop the lean and answer plainly.`
-    );
-  } else {
-    parts.push(
-      'No explicit mode chosen and behavior is ambiguous. If the visitor states intent, follow it. If not and it matters, ask one short clarifying question rather than guessing.'
-    );
-  }
 
   // Trigger block
   if (trigger === 'leaving') {

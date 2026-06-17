@@ -1,7 +1,5 @@
 import { getVisitorId, getSessionContext } from '../core/visitor'
 
-export type EchoIntent = 'recruiting' | 'collaborating' | 'curious' | 'roaming'
-
 export interface ChatMessage {
   id: string
   role: 'echo' | 'user'
@@ -17,14 +15,6 @@ export interface EchoResult {
   structuredPayload?: unknown
 }
 
-// UI intents map to the backend's mode contract.
-const INTENT_WIRE: Record<EchoIntent, 'HIRE' | 'COLLAB' | 'CURIOUS' | null> = {
-  recruiting: 'HIRE',
-  collaborating: 'COLLAB',
-  curious: 'CURIOUS',
-  roaming: null,
-}
-
 interface SendOptions {
   trigger?: 'leaving'
 }
@@ -32,7 +22,6 @@ interface SendOptions {
 export async function sendToEcho(
   message: string,
   history: HistoryItem[],
-  intent: EchoIntent | null,
   opts: SendOptions = {},
 ): Promise<EchoResult> {
   const res = await fetch('/api/echo', {
@@ -41,7 +30,6 @@ export async function sendToEcho(
     body: JSON.stringify({
       message,
       history,
-      intent: intent ? INTENT_WIRE[intent] : null,
       visitorId: getVisitorId(),
       sessionContext: getSessionContext(),
       ...(opts.trigger ? { trigger: opts.trigger } : {}),

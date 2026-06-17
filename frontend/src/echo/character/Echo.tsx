@@ -10,7 +10,7 @@ export default function Echo() {
   const hint = useEchoStore((s) => s.hint)
 
   const { pos, displaySize, moveDuration, handleClick, handleClose, dismissHint } = useEcho()
-  const { intent, messages, isLoading, selectIntent, sendMessage, reset } = useChat()
+  const { messages, isLoading, sendMessage, reset } = useChat()
 
   const chatVisible  = ['TALKING', 'THINKING'].includes(fsm.state)
   function onSpriteClick() {
@@ -51,10 +51,8 @@ export default function Echo() {
       >
         <ChatBubble
           visible={chatVisible}
-          intent={intent}
           messages={messages}
           isLoading={isLoading}
-          onIntentSelect={selectIntent}
           onSend={sendMessage}
           onClose={onClose}
         />
