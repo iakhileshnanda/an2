@@ -1,25 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEchoStore } from '../store/echoStore'
 import { useEcho } from '../core/useEcho'
-import { useChat } from '../chat/useChat'
 import SpriteAnimator from './SpriteAnimator'
-import ChatBubble from '../chat/ChatBubble'
 
 export default function Echo() {
   const fsm  = useEchoStore((s) => s.fsm)
   const hint = useEchoStore((s) => s.hint)
 
-  const { pos, displaySize, moveDuration, handleClick, handleClose, dismissHint } = useEcho()
-  const { messages, isLoading, sendMessage, reset } = useChat()
+  const { pos, displaySize, moveDuration, handleClick, dismissHint } = useEcho()
 
-  const chatVisible  = ['TALKING', 'THINKING'].includes(fsm.state)
   function onSpriteClick() {
     handleClick()
-  }
-
-  function onClose() {
-    reset()
-    handleClose()
   }
 
   return (
@@ -38,29 +29,9 @@ export default function Echo() {
         willChange: 'transform',
       }}
     >
-      {/* Chat bubble */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '100%',
-          marginBottom: 4,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 9001,
-        }}
-      >
-        <ChatBubble
-          visible={chatVisible}
-          messages={messages}
-          isLoading={isLoading}
-          onSend={sendMessage}
-          onClose={onClose}
-        />
-      </div>
-
       {/* Contextual hint */}
       <AnimatePresence>
-        {hint && !chatVisible && (
+        {hint && (
           <motion.div
             key="hint"
             initial={{ opacity: 0, y: 4 }}

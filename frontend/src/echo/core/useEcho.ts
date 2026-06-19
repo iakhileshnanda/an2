@@ -45,6 +45,7 @@ export function useEcho() {
   const roamTimer        = useRef<ReturnType<typeof setTimeout> | null>(null)
   const animDoneTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
   const leaveTimer       = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const returnTimer      = useRef<ReturnType<typeof setTimeout> | null>(null)
   const idleHintTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hintDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const clickCount       = useRef(0)
@@ -115,16 +116,32 @@ export function useEcho() {
     return () => { if (animDoneTimer.current) clearTimeout(animDoneTimer.current) }
   }, [fsm.state, dispatch])
 
-  // LEAVING — slide off then reset
+  // LEAVING — slide off-screen, then slide back in at a random spot. Both
+  // legs stay in the LEAVING state so they share its fixed, slow
+  // moveDuration (1.6s) rather than snapping in at ROAMING's variable speed.
   useEffect(() => {
     if (fsm.state !== 'LEAVING') return
     const targetX = fsm.facingLeft ? -displaySize - 40 : window.innerWidth + 40
     setPos((p) => ({ ...p, x: targetX }))
+
     leaveTimer.current = setTimeout(() => {
-      dispatch({ type: 'LEAVE_DONE' })
-      setPos(getInitPos(displaySize))
+      const roamMinX = Math.max(MARGIN, Math.round(window.innerWidth * 0.10))
+      const roamMaxX = Math.min(
+        window.innerWidth - displaySize - MARGIN,
+        Math.round(window.innerWidth * 0.90 - displaySize)
+      )
+      const reentryX = roamMinX + Math.random() * (roamMaxX - roamMinX)
+      setPos((p) => ({ ...p, x: reentryX }))
+
+      returnTimer.current = setTimeout(() => {
+        dispatch({ type: 'LEAVE_DONE' })
+      }, LEAVE_DURATION)
     }, LEAVE_DURATION)
-    return () => { if (leaveTimer.current) clearTimeout(leaveTimer.current) }
+
+    return () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      if (returnTimer.current) clearTimeout(returnTimer.current)
+    }
   }, [fsm.state, fsm.facingLeft, displaySize, dispatch])
 
   // IntersectionObserver for section hints
@@ -199,7 +216,7 @@ export function useEcho() {
         }
       } else {
         if (state === 'TALKING') {
-          // clicking Echo while chat is open does nothing
+          dispatch({ type: 'CLOSE' })
         } else {
           dispatch({ type: 'CLICK' })
         }
@@ -210,6 +227,21 @@ export function useEcho() {
   const handleClose = useCallback(() => {
     dispatch({ type: 'CLOSE' })
     scheduleIdleHint()
+  }, [dispatch, scheduleIdleHint])
+
+  // clicking anywhere outside the droid (and outside the overlay terminal)
+  // closes the talk state so the droid resumes roaming as usual.
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!['TALKING', 'THINKING'].includes(fsmRef.current.state)) return
+      const target = e.target as Element
+      if (target.closest?.('[aria-label="Echo"]')) return
+      if (target.closest?.('#echo-overlay-root')) return
+      dispatch({ type: 'CLOSE' })
+      scheduleIdleHint()
+    }
+    document.addEventListener('click', onDocClick)
+    return () => document.removeEventListener('click', onDocClick)
   }, [dispatch, scheduleIdleHint])
 
   const moveDuration =

@@ -61,6 +61,7 @@ const CSS = `
   z-index: 9002;            /* above the droid (9000/9001), below gesture (9999) */
   pointer-events: none;
   --echo-ov-green: #5e9c3a; /* terminal green — retheme here */
+  --echo-ov-border: #1B1716;
   --echo-ov-bg: var(--color-white, #edebde);
   --echo-ov-font: var(--font-mono, 'JetBrains Mono', monospace);
   --echo-ov-px: 4px;        /* one "pixel" unit for the bubble border/tail */
@@ -124,69 +125,34 @@ const CSS = `
 }
 @keyframes eo-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 
-/* ── pixel speech bubble (CSS-only, stepped box-shadow border) ── */
+/* ── dotted terminal speech bubble ── */
 #${ROOT_ID} .eo-bubble {
-  --b: var(--echo-ov-px);
   display: inline-block;
+  min-width: 96px;
   max-width: 240px;
-  padding: 8px 10px;
+  padding: 10px 16px;
   background: var(--echo-ov-bg);
   color: var(--echo-ov-green);
   font-size: 13px;
-  line-height: 1.35;
-  text-align: center;
-  image-rendering: pixelated;
+  line-height: 1.7;
+  text-align: left;
+  white-space: pre-line;
+  border: 1px dotted var(--echo-ov-border);
   transform: translate(-50%, -100%);
   opacity: 0;
   transition: opacity 0.2s ease;
-  /* Four no-spread directional shadows form the border; the empty b×b corners
-     produce the stepped, pixel-art outline. */
-  box-shadow:
-    0 calc(-1 * var(--b)) 0 0 var(--echo-ov-green),
-    0 var(--b) 0 0 var(--echo-ov-green),
-    calc(-1 * var(--b)) 0 0 0 var(--echo-ov-green),
-    var(--b) 0 0 0 var(--echo-ov-green);
 }
 #${ROOT_ID} .eo-bubble.eo-on { opacity: 1; }
 
-/* downward stepped tail, built from the bubble's bottom edge */
-#${ROOT_ID} .eo-bubble .eo-tail,
-#${ROOT_ID} .eo-bubble .eo-tail::after,
-#${ROOT_ID} .eo-bubble .eo-tail::before {
-  content: '';
-  position: absolute;
-  background: var(--echo-ov-bg);
-}
-/* row 1 (widest): sits on the bubble's bottom border and punches through it */
+/* downward dotted tail connecting the bubble to the droid's head */
 #${ROOT_ID} .eo-bubble .eo-tail {
+  position: absolute;
   left: 50%;
   top: 100%;
-  width: calc(5 * var(--b));
-  height: var(--b);
-  margin-left: calc(-2.5 * var(--b));
-  box-shadow:
-    inset var(--b) 0 0 0 var(--echo-ov-green),
-    inset calc(-1 * var(--b)) 0 0 0 var(--echo-ov-green);
-}
-/* row 2 (narrower) */
-#${ROOT_ID} .eo-bubble .eo-tail::before {
-  left: 50%;
-  top: 100%;
-  width: calc(3 * var(--b));
-  height: var(--b);
-  margin-left: calc(-1.5 * var(--b));
-  box-shadow:
-    inset var(--b) 0 0 0 var(--echo-ov-green),
-    inset calc(-1 * var(--b)) 0 0 0 var(--echo-ov-green);
-}
-/* row 3 (the green tip) */
-#${ROOT_ID} .eo-bubble .eo-tail::after {
-  left: 50%;
-  top: calc(200% - var(--b));
-  width: var(--b);
-  height: var(--b);
-  margin-left: calc(-0.5 * var(--b));
-  background: var(--echo-ov-green);
+  width: 0;
+  height: ${BUBBLE_GAP}px;
+  margin-left: -1px;
+  border-left: 1px dotted var(--echo-ov-border);
 }
 `
 
@@ -338,10 +304,21 @@ export function initEchoOverlay(): EchoOverlayHandle {
     setInputVisible(!inputVisible)
   }
 
+  // clicking anywhere outside the droid/input closes the terminal so the
+  // droid can resume roaming (the FSM side of "close" lives in useEcho.ts).
+  function onDocClick(e: MouseEvent) {
+    if (!inputVisible) return
+    const target = e.target as Node
+    if (droid && droid.contains(target)) return
+    if (root.contains(target)) return
+    setInputVisible(false)
+  }
+
   realInput.addEventListener('input', onRealInput)
   realInput.addEventListener('keydown', onRealKeydown)
   // keep the native input under the visible cursor: focus when the group is clicked
   inputEl.addEventListener('mousedown', () => realInput.focus())
+  document.addEventListener('click', onDocClick)
 
   // ── frame loop: track the droid, position everything ──
   function frame() {
@@ -397,6 +374,7 @@ export function initEchoOverlay(): EchoOverlayHandle {
       clickBound?.removeEventListener('click', onDroidClick)
       realInput.removeEventListener('input', onRealInput)
       realInput.removeEventListener('keydown', onRealKeydown)
+      document.removeEventListener('click', onDocClick)
       root.remove()
       document.getElementById(STYLE_ID)?.remove()
       active = null
