@@ -33,8 +33,8 @@ One big working session; everything below shipped today.
 ### Content refresh (from the real résumé)
 - Experience timeline corrected: Trustt (2023–now, Frontend Lead) and Transtech
   Solutions (2019–2023) replace the placeholder ValueLabs entries; skills and Echo's
-  `resume.json` updated to match. `resumeUrl` points at `/resume.pdf`
-  (**TODO: drop the exported PDF into `frontend/public/resume.pdf`**).
+  `resume.json` updated to match. `resumeUrl` points at `/resume.pdf`, served
+  from `frontend/public/resume.pdf` — Echo hands out the link when asked for the CV.
 
 ### Visual overhaul
 - **Dark act** — the closing scenes (ONE NIGHT / LET'S BUILD / HIRE·ME) share one
