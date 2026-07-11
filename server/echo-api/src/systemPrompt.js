@@ -35,6 +35,30 @@ function fmtDwell(dwell) {
     .join(', ');
 }
 
+// Concise per-visitor memory block. Built only from what was actually
+// recorded — if nothing exists, returns null and the section is omitted.
+function buildVisitorMemoryBlock(stored) {
+  if (!stored) return null;
+  const mem = stored.memory || {};
+  const lines = [];
+
+  if (Array.isArray(mem.topics) && mem.topics.length) {
+    lines.push('Topics discussed:\n' + mem.topics.map((t) => `- ${t}`).join('\n'));
+  }
+  if (Array.isArray(mem.recentQuestions) && mem.recentQuestions.length) {
+    lines.push('Recent questions:\n' + mem.recentQuestions.map((q) => `- ${q}`).join('\n'));
+  }
+  if (mem.preferences && mem.preferences.replyStyle) {
+    lines.push(`Preferred reply style: ${mem.preferences.replyStyle}`);
+  }
+  if (stored.lastVisitSummary) {
+    lines.push(`Previous visit summary:\n${stored.lastVisitSummary}`);
+  }
+
+  if (!lines.length) return null;
+  return 'KNOWN ABOUT THIS VISITOR\n\n' + lines.join('\n\n');
+}
+
 function buildSystemPrompt({ stored, returning, sessionContext = {}, trigger = null }) {
   const parts = [ECHO_PERSONA, '\n--- CURRENT CONTEXT ---'];
 
@@ -47,7 +71,6 @@ function buildSystemPrompt({ stored, returning, sessionContext = {}, trigger = n
         `- sections explored previously: ${(stored.sectionsExplored || []).join(', ') || 'unknown'}`,
         `- last intent: ${stored.lastIntent || 'unknown'}`,
         `- last topic: ${stored.lastTopic || 'unknown'}`,
-        stored.lastVisitSummary ? `- your note from last visit: "${stored.lastVisitSummary}"` : null,
         'You may reference this briefly and naturally. Do not over-do it.',
       ].filter(Boolean).join('\n')
     );
@@ -63,8 +86,15 @@ function buildSystemPrompt({ stored, returning, sessionContext = {}, trigger = n
       `- time on page: ${sessionContext.timeOnPage ?? 0}s`,
       `- last droid state: ${sessionContext.lastFsmState ?? 'unknown'}`,
       `- section dwell times: ${fmtDwell(sessionContext.sectionDwellTimes)}`,
-    ].join('\n')
+      sessionContext.focusedTimelineEntry
+        ? `- focused timeline entry: ${sessionContext.focusedTimelineEntry} (the career era the visitor is currently looking at — if they ask about "this" or "that time", they likely mean this one)`
+        : null,
+    ].filter(Boolean).join('\n')
   );
+
+  // Visitor memory block — omitted entirely when nothing has been recorded
+  const memoryBlock = buildVisitorMemoryBlock(stored);
+  if (memoryBlock) parts.push(memoryBlock);
 
   // Trigger block
   if (trigger === 'leaving') {

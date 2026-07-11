@@ -1,78 +1,105 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import projects from '@content/projects.json';
 import styles from './Projects.module.css';
+import ScrollStack, { ScrollStackItem } from '@components/ScrollStack';
+import GlassSurface from '@components/GlassSurface';
+
+const EASE = [0.22, 1, 0.36, 1];
 
 function ProjectCard({ project, index }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'center center'],
-  });
-
-  const x = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [index % 2 === 0 ? -200 : 200, 0]
-  );
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-
   return (
-    <motion.div
-      ref={ref}
-      style={{ x, opacity }}
-      className={`group relative border border-[#1B1716] bg-transparent p-8 md:p-10 transition-colors duration-300 hover:bg-[#1B1716] ${
-        index % 2 === 0 ? 'md:mr-auto md:ml-12' : 'md:ml-auto md:mr-12'
-      } max-w-xl w-full`}
-      data-interactive
+    <GlassSurface
+      width="100%"
+      height="auto"
+      borderRadius={28}
+      backgroundOpacity={0.18}
+      saturation={1.3}
+      forceFallback
+      className={styles.projectGlass}
     >
-      <h3 className="font-monument text-3xl md:text-5xl text-[#1B1716] group-hover:text-[#EDEBDE] transition-colors duration-300 mb-2">
-        {project.name}
-      </h3>
-      <p className="font-code text-xs tracking-widest text-[#1B1716]/50 group-hover:text-[#EDEBDE]/60 uppercase mb-4 transition-colors duration-300">
-        {project.company}
-      </p>
-      <p className="font-body text-sm text-[#1B1716]/60 group-hover:text-[#EDEBDE]/75 mb-6 transition-colors duration-300">
-        {project.description}
-      </p>
-      {project.link && (
-        <a
-          href={project.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-code text-xs tracking-widest text-[#1B1716]/50 group-hover:text-[#EDEBDE] hover:underline uppercase mb-4 inline-block transition-colors duration-300"
-        >
-          &#8599; GitHub
-        </a>
-      )}
-      <div className="flex flex-wrap gap-2">
-        {project.tags.map((tag) => (
-          <span
-            key={tag}
-            className="font-code text-xs px-3 py-1 border border-[#1B1716]/25 group-hover:border-[#EDEBDE]/40 text-[#1B1716]/45 group-hover:text-[#EDEBDE]/70 transition-colors duration-300"
-          >
-            {tag}
+      <div
+        className="p-8 md:p-14 min-h-[44vh] md:min-h-[420px] flex flex-col"
+        data-interactive
+      >
+        {/* index number · name — company */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 mb-6">
+          <div className="flex items-baseline gap-4 md:gap-6">
+            <span
+              className={`font-code text-sm tracking-widest ${
+                project.featured ? 'text-[#810100]' : 'text-[#1B1716]/35'
+              }`}
+            >
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <h3 className="font-monument text-4xl md:text-6xl leading-none text-[#1B1716]">
+              {project.name}
+            </h3>
+          </div>
+          <span className="font-code text-xs tracking-widest uppercase text-[#1B1716]/45">
+            {project.company}
           </span>
-        ))}
+        </div>
+
+        <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/65 max-w-3xl mb-auto">
+          {project.description}
+        </p>
+
+        {/* tags as one mono line + link — no chip boxes */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 mt-8">
+          <p className="font-code text-xs md:text-sm tracking-wide text-[#1B1716]/45">
+            {project.tags.join(' · ')}
+          </p>
+          {project.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-code text-xs tracking-widest uppercase text-[#810100] hover:underline"
+            >
+              &#8599; GitHub
+            </a>
+          )}
+        </div>
       </div>
-    </motion.div>
+    </GlassSurface>
   );
 }
 
 export default function Projects() {
   return (
-    <section id="projects" className="scene-section min-h-screen py-24 md:py-32">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2
-          className={`font-monument text-[#1B1716] text-center mb-20 ${styles.sectionTitle}`}
+    <section id="projects" className="scene-section relative py-24 md:py-32">
+      {/* aurora glow the glass refracts */}
+      <div className={styles.stackBackdrop} aria-hidden="true" />
+
+      <div className="relative max-w-[1500px] mx-auto px-4 md:px-6">
+        <motion.h2
+          className={`font-monument text-[#1B1716] text-center mb-10 ${styles.sectionTitle}`}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7, ease: EASE }}
         >
           WORK
-        </h2>
-        <div className="flex flex-col gap-16 md:gap-24">
+        </motion.h2>
+
+        {/* itemDistance is viewport-scale so cards arrive one at a time —
+            each card gets its own stretch of scroll before the next stacks */}
+        <ScrollStack
+          useWindowScroll
+          itemDistance={300}
+          itemScale={0.04}
+          itemStackDistance={18}
+          stackPosition="12%"
+          scaleEndPosition="6%"
+          baseScale={0.82}
+        >
           {projects.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
+            <ScrollStackItem key={project.id}>
+              <ProjectCard project={project} index={i} />
+            </ScrollStackItem>
           ))}
-        </div>
+        </ScrollStack>
       </div>
     </section>
   );

@@ -20,7 +20,7 @@ export default function AwakeningScene() {
   return (
     <section
       ref={sectionRef}
-      className="scene-section min-h-screen bg-black flex items-center relative overflow-hidden"
+      className="scene-section min-h-screen flex items-center relative overflow-hidden"
     >
       <div className="w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         {/* Left: Cinematic text */}

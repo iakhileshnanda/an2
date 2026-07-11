@@ -20,9 +20,13 @@ export default function HomePage() {
         <Hero />
         <Experience />
         <Projects />
-        <AwakeningScene />
-        <AskScene />
-        <Contact />
+        {/* The dark closing act — one continuous backdrop across all three
+            scenes so no seams show between them */}
+        <div className="dark-act">
+          <AwakeningScene />
+          <AskScene />
+          <Contact />
+        </div>
       </Suspense>
 
       <EchoRoot />

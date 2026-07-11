@@ -203,6 +203,29 @@ body {
   90% { transform: translate(-10%, 10%); }
 }
 
+/* ── DARK ACT BACKGROUND ──
+   Single shared backdrop wrapped around the whole closing act (Awakening,
+   Ask, Contact) so the three scenes read as one continuous block — no seams.
+   Warm ink instead of default black, one faint cherry vignette at the very
+   end of the act, and a local grain pass — the global .film-grain uses
+   overlay blending, which vanishes on near-black, so the dark act carries
+   its own. */
+.dark-act {
+  position: relative;
+  background:
+    radial-gradient(ellipse 90% 28% at 50% 100%, rgba(129, 1, 0, 0.13), transparent 70%),
+    #141110;
+}
+
+.dark-act::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.045;
+}
+
 /* ── ANIMATIONS ── */
 @keyframes pulse-line {
   0%, 100% { opacity: 0.3; }

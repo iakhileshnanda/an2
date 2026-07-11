@@ -2,8 +2,12 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import anime from 'animejs';
 import experience from '@content/experience.json';
+import now from '@content/now.json';
 import styles from './Experience.module.css';
-import CurrentlyBuilding from '@components/CurrentlyBuilding';
+import NowCard from './NowCard';
+import RecentUpdates from './RecentUpdates';
+import { askEcho } from '@echo/echo-overlay';
+import { useEchoStore } from '@echo/store/echoStore';
 
 const springConfig = { stiffness: 80, damping: 20, mass: 0.5 };
 
@@ -60,6 +64,7 @@ export default function Experience() {
   const [dayCount, setDayCount] = useState(0);
   const hasAnimated = useRef(false);
   const currentYear = getCurrentYear();
+  const setFocusedTimeline = useEchoStore((s) => s.setFocusedTimeline);
 
   const daysSinceStart = Math.floor(
     (Date.now() - new Date('2019-01-01').getTime()) / (1000 * 60 * 60 * 24)
@@ -127,6 +132,7 @@ export default function Experience() {
             initial={{ opacity: 0, x: 60 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-80px' }}
+            onViewportEnter={() => setFocusedTimeline(`Now (${currentYear}) — current work`)}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <TypingPhrase />
@@ -138,7 +144,18 @@ export default function Experience() {
                 days building
               </span>
             </div>
-            <CurrentlyBuilding />
+
+            {/* Current mission — one paragraph, above the live card */}
+            <div className="mb-8">
+              <div className="font-code text-xs tracking-widest text-[#1B1716]/45 uppercase mb-3">
+                Current Mission
+              </div>
+              <p className="font-body text-base leading-relaxed text-[#1B1716]/65">
+                {now.mission}
+              </p>
+            </div>
+
+            <NowCard />
           </motion.div>
         </div>
       </div>
@@ -150,6 +167,7 @@ export default function Experience() {
           year={entry.year}
           label={entry.label}
           sizeClass={styles[`year${i + 1}`]}
+          onEnter={() => setFocusedTimeline(`${entry.company} (${entry.year})`)}
         >
           <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/65 mb-6">
             {entry.description}
@@ -157,8 +175,20 @@ export default function Experience() {
           <p className="font-body text-base md:text-lg leading-relaxed text-[#1B1716]/40">
             {entry.detail}
           </p>
+          {entry.echoPrompt && (
+            <button
+              type="button"
+              onClick={() => askEcho(entry.echoPrompt)}
+              className="mt-6 font-code text-xs tracking-widest text-[#810100] uppercase hover:opacity-60 transition-opacity"
+            >
+              ask echo →
+            </button>
+          )}
         </YearBlock>
       ))}
+
+      {/* Shipping log — short developer updates */}
+      <RecentUpdates />
 
       <motion.div
         className="absolute bottom-0 left-0 h-[1px] bg-[#810100]"
@@ -168,9 +198,13 @@ export default function Experience() {
   );
 }
 
-function YearBlock({ year, label, sizeClass, children }) {
+function YearBlock({ year, label, sizeClass, onEnter, children }) {
   return (
-    <div className="py-20 md:py-28 flex items-center">
+    <motion.div
+      className="py-20 md:py-28 flex items-center"
+      onViewportEnter={onEnter}
+      viewport={{ amount: 0.4 }}
+    >
       <div className="w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center gap-12 md:gap-20">
         <motion.div
           className="flex-shrink-0"
@@ -197,6 +231,6 @@ function YearBlock({ year, label, sizeClass, children }) {
           {children}
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

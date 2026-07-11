@@ -18,7 +18,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="bg-black flex flex-col items-center justify-center py-32 px-6">
+    <section id="contact" className="flex flex-col items-center justify-center py-32 px-6">
       <motion.div
         className="flex flex-col items-center gap-10 w-full max-w-xl"
         initial={{ opacity: 0, y: 30 }}

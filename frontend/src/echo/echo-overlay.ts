@@ -1,4 +1,13 @@
-import { sendToEcho } from './chat/chatService'
+import { sendToEcho, sendLeaving } from './chat/chatService'
+import type { HistoryItem } from './chat/chatService'
+// @ts-ignore — editorial JSON lives outside src/; resolved by the @content alias
+import changelogJson from '@content/changelog.json'
+
+const changelog: Array<{ date: string; month: string; items: string[] }> = Array.isArray(
+  changelogJson,
+)
+  ? changelogJson
+  : []
 
 /* ============================================================================
    ECHO OVERLAY — green terminal UI layer around the roaming droid
@@ -53,6 +62,35 @@ const OFFLINE_REPLY = 'offline. reach akhilesh: theakhilesh.m@gmail.com'
 
 const STYLE_ID = 'echo-overlay-style'
 const ROOT_ID = 'echo-overlay-root'
+
+// Session conversation memory — survives refresh via sessionStorage, dies with
+// the tab (a new tab is a new conversation). Only the last 8 turns are kept.
+const HISTORY_KEY = 'echo_chat_history'
+const HISTORY_MAX = 8
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = sessionStorage.getItem(HISTORY_KEY)
+    const arr = raw ? JSON.parse(raw) : []
+    if (!Array.isArray(arr)) return []
+    return arr
+      .filter(
+        (m) =>
+          m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string',
+      )
+      .slice(-HISTORY_MAX)
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(history: HistoryItem[]): void {
+  try {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+  } catch {
+    /* private mode — in-memory history still works */
+  }
+}
 
 const CSS = `
 #${ROOT_ID} {
@@ -161,6 +199,16 @@ export interface EchoOverlayHandle {
 }
 
 let active: EchoOverlayHandle | null = null
+let askImpl: ((prompt: string) => void) | null = null
+
+/**
+ * Programmatically ask Echo something — used by the "ask echo →" actions on
+ * the timeline. Sends immediately (no typing needed); the reply shows in the
+ * usual speech bubble. No-op if the overlay isn't mounted.
+ */
+export function askEcho(prompt: string): void {
+  askImpl?.(prompt)
+}
 
 /**
  * Mount the overlay. Idempotent — a second call returns the existing handle.
@@ -227,6 +275,15 @@ export function initEchoOverlay(): EchoOverlayHandle {
   let idleIdx = 0
   let idleTimer: ReturnType<typeof setTimeout> | null = null
 
+  // conversation memory for this session
+  let history: HistoryItem[] = loadHistory()
+  let leavingSent = false
+
+  function pushHistory(role: HistoryItem['role'], content: string) {
+    history = [...history, { role, content }].slice(-HISTORY_MAX)
+    saveHistory(history)
+  }
+
   // ── idle rotation ──
   function showIdleLine() {
     idleEl.textContent = IDLE_LINES[idleIdx % IDLE_LINES.length]
@@ -279,6 +336,20 @@ export function initEchoOverlay(): EchoOverlayHandle {
     mirrorEl.textContent = realInput.value
   }
 
+  function submit(value: string) {
+    hideBubble() // dismiss previous reply on next input
+    showBubble('…')
+    // send prior turns only — the backend appends the current message itself
+    const past = history.slice()
+    pushHistory('user', value)
+    sendToEcho(value, past)
+      .then((r) => {
+        if (r.reply) pushHistory('assistant', r.reply)
+        showBubble(r.reply || OFFLINE_REPLY)
+      })
+      .catch(() => showBubble(OFFLINE_REPLY))
+  }
+
   function onRealKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       e.preventDefault()
@@ -291,11 +362,7 @@ export function initEchoOverlay(): EchoOverlayHandle {
     if (!value) return
     realInput.value = ''
     mirrorEl.textContent = ''
-    hideBubble() // dismiss previous reply on next input
-    showBubble('…')
-    sendToEcho(value, [])
-      .then((r) => showBubble(r.reply || OFFLINE_REPLY))
-      .catch(() => showBubble(OFFLINE_REPLY))
+    submit(value)
   }
 
   // clicking the droid toggles the input. We do NOT stopPropagation — the
@@ -314,11 +381,53 @@ export function initEchoOverlay(): EchoOverlayHandle {
     setInputVisible(false)
   }
 
+  // leaving trigger — lets the backend write its visit summary for next time.
+  // Fires once, and only if there was an actual conversation to summarize.
+  function onPageLeave() {
+    if (leavingSent || history.length === 0) return
+    leavingSent = true
+    sendLeaving(history)
+  }
+
+  // ── returning visitor greeting ──
+  // If this visitor has been here before and the changelog has entries newer
+  // than their last visit, greet them once with what shipped since.
+  const LAST_SEEN_KEY = 'echo_last_seen'
+  let greetTimer: ReturnType<typeof setTimeout> | null = null
+  function scheduleReturningGreeting() {
+    try {
+      const visits = parseInt(localStorage.getItem('echo_visit_count') || '1', 10) || 1
+      const lastSeen = localStorage.getItem(LAST_SEEN_KEY)
+      localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString())
+      if (visits <= 1) return
+
+      // changelog dates are "YYYY-MM" — string compare works
+      const fresh = lastSeen
+        ? changelog.filter((c) => c.date > lastSeen.slice(0, 7))
+        : changelog.slice(0, 1)
+      const items = fresh.flatMap((c) => c.items).slice(0, 3)
+      if (!items.length) return
+
+      greetTimer = setTimeout(() => {
+        if (inputVisible || bubbleVisible) return // don't interrupt
+        showBubble(
+          'welcome back.\nsince your last visit:\n' +
+            items.map((i) => `• ${i.toLowerCase()}`).join('\n'),
+        )
+      }, 3500)
+    } catch {
+      /* localStorage unavailable — skip the greeting */
+    }
+  }
+  scheduleReturningGreeting()
+
   realInput.addEventListener('input', onRealInput)
   realInput.addEventListener('keydown', onRealKeydown)
   // keep the native input under the visible cursor: focus when the group is clicked
   inputEl.addEventListener('mousedown', () => realInput.focus())
   document.addEventListener('click', onDocClick)
+  window.addEventListener('pagehide', onPageLeave)
+  window.addEventListener('beforeunload', onPageLeave)
 
   // ── frame loop: track the droid, position everything ──
   function frame() {
@@ -364,6 +473,12 @@ export function initEchoOverlay(): EchoOverlayHandle {
 
   rafId = requestAnimationFrame(frame)
 
+  // expose the programmatic ask for "ask echo →" timeline actions
+  askImpl = (prompt: string) => {
+    setInputVisible(false)
+    submit(prompt)
+  }
+
   // ── teardown ──
   const handle: EchoOverlayHandle = {
     destroy() {
@@ -371,10 +486,14 @@ export function initEchoOverlay(): EchoOverlayHandle {
       clearInterval(rebindTimer)
       if (idleTimer) clearTimeout(idleTimer)
       if (bubbleTimer) clearTimeout(bubbleTimer)
+      if (greetTimer) clearTimeout(greetTimer)
+      askImpl = null
       clickBound?.removeEventListener('click', onDroidClick)
       realInput.removeEventListener('input', onRealInput)
       realInput.removeEventListener('keydown', onRealKeydown)
       document.removeEventListener('click', onDocClick)
+      window.removeEventListener('pagehide', onPageLeave)
+      window.removeEventListener('beforeunload', onPageLeave)
       root.remove()
       document.getElementById(STYLE_ID)?.remove()
       active = null

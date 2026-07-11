@@ -2,3 +2,27 @@
   font-size: clamp(2rem, 8vw, 8rem);
   letter-spacing: -0.04em;
 }
+
+/* Soft cherry aurora behind the glass stack — glass needs something to
+   refract, and flat Cotton gives it nothing. Stays in the brand palette. */
+.stackBackdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* No filter: blur() here — a live 48px blur over the whole section gets
+     re-sampled by every glass card's backdrop-filter each frame and tanks
+     scroll performance. Radial gradients are already soft. */
+  background:
+    radial-gradient(48% 34% at 18% 18%, rgba(129, 1, 0, 0.22), transparent 72%),
+    radial-gradient(42% 32% at 82% 38%, rgba(99, 1, 2, 0.18), transparent 72%),
+    radial-gradient(54% 38% at 45% 68%, rgba(129, 1, 0, 0.15), transparent 72%),
+    radial-gradient(40% 30% at 70% 88%, rgba(27, 23, 22, 0.20), transparent 72%);
+}
+
+/* GlassSurface centers its content by default — project cards want a
+   left-aligned block layout instead. */
+.projectGlass :global(.glass-surface__content) {
+  display: block;
+  padding: 0;
+  height: auto;
+}

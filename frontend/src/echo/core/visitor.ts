@@ -14,6 +14,7 @@ export interface SessionContext {
   visitCount: number
   lastFsmState: string
   sectionDwellTimes: Record<string, number> // seconds per section
+  focusedTimelineEntry: string | null // career era currently in view
 }
 
 function makeId(): string {
@@ -91,6 +92,7 @@ export function getSessionContext(): SessionContext {
     visitCount,
     lastFsmState: useEchoStore.getState().fsm.state,
     sectionDwellTimes: dwell,
+    focusedTimelineEntry: useEchoStore.getState().focusedTimeline,
   }
 }
 

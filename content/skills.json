@@ -4,40 +4,42 @@
       "id": "ai-ml",
       "label": "AI / ML",
       "skills": [
+        { "name": "LLM Integration (Claude, Groq, Cerebras)", "level": "expert" },
+        { "name": "AI Agent Orchestration", "level": "expert" },
         { "name": "Multi-Agent Systems", "level": "expert" },
-        { "name": "LLM Integration", "level": "expert" },
-        { "name": "RAG / Vector DB", "level": "expert" },
         { "name": "MCP Servers", "level": "expert" },
-        { "name": "Knowledge Graphs", "level": "advanced" },
-        { "name": "GraphRAG", "level": "advanced" },
-        { "name": "NVIDIA NIM", "level": "intermediate" }
+        { "name": "Prompt Engineering", "level": "expert" },
+        { "name": "RAG / GraphRAG", "level": "advanced" },
+        { "name": "Knowledge Graphs / Neo4j", "level": "advanced" },
+        { "name": "n8n Workflow Automation", "level": "advanced" }
       ]
     },
     {
       "id": "frontend",
       "label": "Frontend",
       "skills": [
-        { "name": "React", "level": "expert" },
-        { "name": "Angular 19", "level": "expert" },
+        { "name": "Angular 2–20 (Signals, Zone-less)", "level": "expert" },
         { "name": "TypeScript", "level": "expert" },
         { "name": "RxJS", "level": "expert" },
-        { "name": "NgRx", "level": "advanced" },
-        { "name": "Framer Motion", "level": "advanced" },
+        { "name": "NgRx / NGXS", "level": "advanced" },
+        { "name": "React", "level": "advanced" },
+        { "name": "Tailwind CSS", "level": "expert" },
         { "name": "D3.js", "level": "advanced" },
-        { "name": "Tailwind CSS", "level": "expert" }
+        { "name": "PWA / Framer Motion", "level": "advanced" }
       ]
     },
     {
       "id": "backend",
       "label": "Backend / Infra",
       "skills": [
-        { "name": "Node.js", "level": "advanced" },
-        { "name": "NestJS", "level": "advanced" },
+        { "name": "Node.js / Express", "level": "advanced" },
+        { "name": "PostgreSQL", "level": "advanced" },
+        { "name": "Redis (cache, pub/sub)", "level": "advanced" },
+        { "name": "Apache Kafka", "level": "intermediate" },
+        { "name": "WebSockets", "level": "advanced" },
         { "name": "Python", "level": "advanced" },
-        { "name": "PostgreSQL", "level": "intermediate" },
-        { "name": "Neo4j", "level": "intermediate" },
-        { "name": "Puppeteer / Automation", "level": "advanced" },
-        { "name": "Nginx", "level": "intermediate" }
+        { "name": "Docker / Nginx / PM2", "level": "advanced" },
+        { "name": "OCI / Cloudflare / CI-CD", "level": "intermediate" }
       ]
     }
   ]

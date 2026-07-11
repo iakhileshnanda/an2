@@ -1,6 +1,6 @@
 export const SITE = {
   url: 'https://akhileshnanda.maya-ai.dev',
-  githubUser: 'akhileshnanda',
+  githubUser: 'iakhileshnanda',
 
   // Shown when GitHub API is unavailable or repo is private
   activeFallback: {

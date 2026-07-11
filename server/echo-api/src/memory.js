@@ -23,6 +23,76 @@ function fileFor(id) {
   return path.join(DATA_DIR, `${id}.json`);
 }
 
+// --- Lightweight visitor memory (no NLP, just keyword matching) --------------
+
+const TOPICS_MAX = 10;
+const INTERESTS_MAX = 10;
+const QUESTIONS_MAX = 5;
+
+// keyword -> canonical topic label + broad interest bucket
+const TOPIC_DEFS = [
+  { re: /\bangular\b/i, label: 'Angular', interest: 'frontend' },
+  { re: /\breact\b/i, label: 'React', interest: 'frontend' },
+  { re: /\bvue\b/i, label: 'Vue', interest: 'frontend' },
+  { re: /\btypescript\b/i, label: 'TypeScript', interest: 'frontend' },
+  { re: /\bjavascript\b/i, label: 'JavaScript', interest: 'frontend' },
+  { re: /\btailwind\b/i, label: 'Tailwind', interest: 'frontend' },
+  { re: /\bnode(?:\.?js)?\b/i, label: 'Node.js', interest: 'backend' },
+  { re: /\bexpress\b/i, label: 'Express', interest: 'backend' },
+  { re: /\bpython\b/i, label: 'Python', interest: 'backend' },
+  { re: /\b(neo4j|mongo(?:db)?|postgres(?:ql)?|sql|database)\b/i, label: 'Databases', interest: 'backend' },
+  { re: /\b(ai|llm|agents?|machine learning|ml)\b/i, label: 'AI', interest: 'ai' },
+  { re: /\b(groq|claude|anthropic|gpt|openai)\b/i, label: 'LLMs', interest: 'ai' },
+  { re: /\baws\b/i, label: 'AWS', interest: 'cloud' },
+  { re: /\b(azure|gcp|cloud)\b/i, label: 'Cloud', interest: 'cloud' },
+  { re: /\b(docker|kubernetes|k8s|devops|nginx|ci\/cd)\b/i, label: 'DevOps', interest: 'cloud' },
+  { re: /\bgithub\b/i, label: 'GitHub', interest: 'code' },
+  { re: /\b(resume|cv|hire|hiring|job|experience)\b/i, label: 'Resume', interest: 'hiring' },
+  { re: /\b(projects?|portfolio|wing-?man|echo)\b/i, label: 'Projects', interest: 'projects' },
+  { re: /\barchitecture\b/i, label: 'Architecture', interest: 'engineering' },
+];
+
+function emptyMemory() {
+  return { interests: [], topics: [], recentQuestions: [], preferences: {} };
+}
+
+// Append keeping the value's latest position, deduped, capped at `max`.
+function pushUnique(list, value, max) {
+  const next = (Array.isArray(list) ? list : []).filter((v) => v !== value);
+  next.push(value);
+  return next.slice(-max);
+}
+
+// Very rough reply-style signal from the last few questions: explicit asks for
+// depth win; otherwise a run of terse prompts ("yes", "ok", "next") = concise.
+function inferReplyStyle(recentQuestions) {
+  const joined = recentQuestions.join(' ');
+  if (/\b(explain|deep dive|in detail|detailed|walk me through|architecture)\b/i.test(joined)) {
+    return 'detailed';
+  }
+  const short = recentQuestions.filter((q) => q.length <= 12).length;
+  if (recentQuestions.length >= 3 && short >= 3) return 'concise';
+  return null;
+}
+
+function updateMemory(mem, message) {
+  const next = { ...emptyMemory(), ...(mem || {}) };
+  const text = message.trim().slice(0, 200);
+
+  next.recentQuestions = pushUnique(next.recentQuestions, text, QUESTIONS_MAX);
+
+  for (const def of TOPIC_DEFS) {
+    if (!def.re.test(text)) continue;
+    next.topics = pushUnique(next.topics, def.label, TOPICS_MAX);
+    next.interests = pushUnique(next.interests, def.interest, INTERESTS_MAX);
+  }
+
+  const style = inferReplyStyle(next.recentQuestions);
+  if (style) next.preferences = { ...next.preferences, replyStyle: style };
+
+  return next;
+}
+
 async function readRaw(id) {
   try {
     const buf = await fs.readFile(fileFor(id), 'utf8');
@@ -71,6 +141,7 @@ async function recordTurn(visitorId, { sessionContext = {}, intent = null, messa
       lastTopic: null,
       lastVisitTimestamp: null,
       lastVisitSummary: null,
+      memory: emptyMemory(),
     };
 
     const sentVisits = Number(sessionContext.visitCount) || 0;
@@ -82,7 +153,10 @@ async function recordTurn(visitorId, { sessionContext = {}, intent = null, messa
     cur.sectionsExplored = [...explored];
 
     if (intent) cur.lastIntent = intent;
-    if (message && message.trim()) cur.lastTopic = message.trim().slice(0, 120);
+    if (message && message.trim()) {
+      cur.lastTopic = message.trim().slice(0, 120);
+      cur.memory = updateMemory(cur.memory, message);
+    }
     cur.lastVisitTimestamp = new Date().toISOString();
 
     await writeRaw(id, cur);

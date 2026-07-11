@@ -1,0 +1,7 @@
+{
+  "mission": "Building AI-first developer experiences — combining frontend engineering, LLMs, and thoughtful product design into systems that ship themselves.",
+  "building": ["Echo — portfolio AI companion", "Maya MIRO", "Oracle — AI Job Hunter"],
+  "latestCommit": null,
+  "currentFocus": ["AI Agents", "Frontend Architecture", "LLM Systems"],
+  "echoPrompt": "What is he currently building?"
+}

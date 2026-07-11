@@ -1,37 +1,40 @@
 [
   {
-    "year": "2024",
-    "label": "The shift",
-    "title": "AI Systems Builder",
-    "company": "Independent",
-    "description": "Stopped building for others. Started building for the problem. AI agents, graph databases, simulation engines — the stack changed because the questions changed.",
-    "detail": "First multi-agent system. First knowledge graph. First time the code felt smarter than me.",
+    "year": "2023",
+    "label": "The lead",
+    "title": "SDE II — Frontend Lead",
+    "company": "Trustt (formerly Novopay)",
+    "description": "A 5-member team, a fintech platform serving 1,000+ banking agents, and an Angular codebase dragged from v9 to v20 — standalone components, Signals, zone-less. Technical debt down 30%, page loads down 25%.",
+    "detail": "48-hour production incidents became 12-hour incidents.",
+    "echoPrompt": "Tell me more about his time at Trustt.",
     "highlights": [
-      "Built Maya MIRO — multi-agent market simulation",
-      "Designed MCP server toolkit (FORGE)",
-      "Started NanoBot — personal AI trained on context"
+      "Led 5-member frontend team on a live banking platform",
+      "Angular 9 → 19/20 migration: Signals, standalone components, zone-less",
+      "50+ production-critical bugs resolved, incident resolution cut 4x"
     ]
   },
   {
     "year": "2021",
-    "label": "Full-stack",
-    "title": "Frontend Lead",
-    "company": "Enterprise (ValueLabs)",
-    "description": "Angular, RxJS, NgRx, real-time dashboards — enterprise-scale frontends that actually shipped. Learned what production means when thousands of users depend on your code daily.",
-    "detail": "Became the person they called when the UI broke at 2 AM.",
+    "label": "Enterprise scale",
+    "title": "Angular Engineer",
+    "company": "Transtech Solutions",
+    "description": "Production Angular SPAs and PWAs for CompuCom and AIG — a B2B/B2C device platform and an insurance monorepo handling 10,000+ applications a month. NgRx, NGXS, NX monorepos, WCAG 2.1 AA.",
+    "detail": "Spot-On Award for delivery quality across high-visibility enterprise projects.",
+    "echoPrompt": "What did he build at AIG and CompuCom?",
     "highlights": [
-      "Led frontend for enterprise Angular 19 dashboards",
-      "Real-time data visualization with D3.js",
-      "Mentored junior developers"
+      "NextGen Portal (CompuCom) — engagement up 40%, bug rate down 30%",
+      "AIG Insurance Portal — completion rate up 35%, builds 20% faster on NX",
+      "GitLab CI/CD pipelines and WCAG 2.1 AA accessibility across portals"
     ]
   },
   {
     "year": "2019",
     "label": "First line of code",
     "title": "Junior Developer",
-    "company": "ValueLabs",
-    "description": "Walked into ValueLabs with zero programming background. A mechanical engineer who'd spent the last year inspecting factory floors — now staring at a code editor for the first time.",
+    "company": "Transtech Solutions",
+    "description": "Walked in with zero programming background. A mechanical engineer who'd spent the last year inspecting factory floors — now staring at a code editor for the first time.",
     "detail": "No CS degree. No bootcamp. Just stayed up every night until the screen started making sense.",
+    "echoPrompt": "How did his career start?",
     "highlights": [
       "Self-taught programming while working full-time",
       "First production frontend shipped within 6 months"
@@ -44,6 +47,7 @@
     "company": "Omni Matrix",
     "description": "Reading engineering drawings, measuring tolerances, walking production lines. CATIA, ANSYS, steel plants, Go-Karts — a mechanical engineer doing exactly what was expected.",
     "detail": "Until it wasn't enough.",
+    "echoPrompt": "What was he doing before software?",
     "highlights": [
       "Mechanical engineering background",
       "CATIA, ANSYS proficiency",

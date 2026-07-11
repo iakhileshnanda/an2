@@ -4,7 +4,7 @@ import styles from './AskScene.module.css';
 
 export default function AskScene() {
   return (
-    <section className="scene-section min-h-screen bg-black flex items-center justify-center relative">
+    <section className="scene-section min-h-screen flex items-center justify-center relative">
       <div className="max-w-5xl mx-auto px-6 text-center flex flex-col items-center">
         <motion.h2
           className={`font-monument text-white leading-tight mb-8 ${styles.title}`}

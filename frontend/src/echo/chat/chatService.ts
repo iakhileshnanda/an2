@@ -19,6 +19,29 @@ interface SendOptions {
   trigger?: 'leaving'
 }
 
+/**
+ * Fire-and-forget "leaving" ping so the backend writes its one-line visit
+ * summary for next time. keepalive lets the request survive page unload.
+ */
+export function sendLeaving(history: HistoryItem[]): void {
+  try {
+    void fetch('/api/echo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        message: '',
+        history,
+        visitorId: getVisitorId(),
+        sessionContext: getSessionContext(),
+        trigger: 'leaving',
+      }),
+    }).catch(() => {})
+  } catch {
+    /* best-effort — the page is going away */
+  }
+}
+
 export async function sendToEcho(
   message: string,
   history: HistoryItem[],

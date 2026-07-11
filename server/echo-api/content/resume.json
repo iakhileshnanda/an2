@@ -1,37 +1,32 @@
 {
   "name": "Akhilesh Nanda",
-  "title": "Frontend Lead / AI Systems Builder",
+  "title": "Senior Frontend Engineer / Tech Lead / AI Builder",
   "location": "Bangalore, India",
-  "summary": "Frontend lead turned AI systems builder. Started as a mechanical engineer with zero programming background, self-taught into production frontend, led enterprise Angular at scale, then moved into AI agents, knowledge graphs, and multi-agent simulation. Builds the thing, not the slide deck.",
-  "availability": "Open to senior frontend, AI engineering, and founding-team roles.",
+  "summary": "Senior frontend engineer and tech lead with 6+ years shipping scalable Angular (2-20) applications and AI-powered products across fintech and enterprise. Started as a mechanical engineer with zero programming background, self-taught into production frontend, now leads a fintech frontend team by day and builds multi-agent systems, LLM pipelines, and autonomous tools by night. Builds the thing, not the slide deck.",
+  "availability": "Targeting Senior Frontend Engineer, Full Stack Engineer, Tech Lead, or AI Builder roles.",
   "contact": {
-    "email": "theakhilesh.m@gmail.com",
+    "email": "theakhileshnanda@gmail.com",
     "github": "https://github.com/iakhileshnanda",
-    "linkedin": "https://linkedin.com/in/akhileshnanda"
+    "linkedin": "https://linkedin.com/in/theakhileshnanda",
+    "website": "https://akhileshnanda.maya-ai.dev"
   },
   "skills": {
-    "frontend": ["Angular (2-19)", "TypeScript", "RxJS", "NgRx", "D3.js", "real-time dashboards"],
-    "ai": ["LLM agents", "RAG / GraphRAG", "multi-agent systems", "Neo4j", "MCP toolkits", "vector DBs"],
-    "backend": ["Node.js", "NestJS", "PostgreSQL", "API design"]
+    "frontend": ["Angular 2-20 (Signals, zone-less, standalone)", "TypeScript", "RxJS", "NgRx / NGXS", "Tailwind CSS", "D3.js", "PWAs", "React"],
+    "ai": ["LLM API integration (Claude, Groq, Cerebras)", "AI agent orchestration", "multi-agent systems", "RAG / GraphRAG", "Neo4j knowledge graphs", "MCP toolkits", "prompt engineering", "n8n automation"],
+    "backend": ["Node.js / Express", "PostgreSQL", "Redis (caching, pub/sub)", "Apache Kafka", "WebSockets", "REST API design", "Nginx / PM2 / Docker", "Oracle Cloud (OCI)"]
   },
   "experience": [
     {
-      "period": "2024 - present",
-      "title": "AI Systems Builder",
-      "company": "Independent",
-      "notes": "Multi-agent systems, knowledge graphs, simulation engines. Built Maya MIRO, the FORGE MCP toolkit, and NanoBot."
+      "period": "07/2023 - present",
+      "title": "SDE II — Frontend Lead",
+      "company": "Trustt (formerly Novopay), Bangalore",
+      "notes": "Leads a 5-member frontend team on a fintech platform serving 1,000+ banking agents. Drove the Angular 9 to 19/20 migration (standalone components, Signals, zone-less) cutting technical debt 30% and page load time 25%. Designed the team's AI Code Generation Framework (Cursor IDE rules, reusable component patterns) — roughly 35% faster feature delivery. Cut average incident resolution from 48 hours to under 12."
     },
     {
-      "period": "2021 - 2024",
-      "title": "Frontend Lead",
-      "company": "ValueLabs (Enterprise)",
-      "notes": "Led frontend for enterprise Angular 19 dashboards, real-time data viz with D3.js, mentored junior devs. The person they called when the UI broke at 2 AM."
-    },
-    {
-      "period": "2019 - 2021",
-      "title": "Junior Developer",
-      "company": "ValueLabs",
-      "notes": "Walked in with no CS background, self-taught while working full-time, shipped first production frontend within 6 months."
+      "period": "04/2019 - 06/2023",
+      "title": "Software Engineer — Frontend / Angular",
+      "company": "Transtech Solutions, Hyderabad / Remote",
+      "notes": "Production Angular SPAs and PWAs for CompuCom, AIG, and Ciel HR. Built CompuCom's NextGen Portal (engagement +40%, bug rate -30%) and AIG's insurance monorepo handling 10,000+ monthly applications (completion rate +35%, NX builds 20% faster). GitLab CI/CD, WCAG 2.1 AA. Spot-On Award for delivery quality. Joined with zero programming background — self-taught mechanical engineer, first production frontend shipped within 6 months."
     },
     {
       "period": "2018 - 2019",
@@ -48,20 +43,30 @@
       "link": "https://github.com/iakhileshnanda/myMayaMIRO"
     },
     {
+      "name": "AI Code Generation Framework",
+      "blurb": "Cursor IDE rule system with a 10-phase AI-assisted workflow, reusable Angular component guides, and automated feature registration — adopted as the team standard at Trustt.",
+      "stack": ["Cursor IDE", "Angular", "AI-assisted development"]
+    },
+    {
       "name": "Oracle",
-      "blurb": "AI job-hunting agent that scrapes, matches, and applies autonomously.",
-      "stack": ["Node.js", "MCP", "AI Agents", "Puppeteer"]
+      "blurb": "LLM-powered job intelligence system — parses job descriptions, scores candidate fit, delivers ranked alerts.",
+      "stack": ["Node.js", "Python", "Groq", "Cerebras", "PostgreSQL", "Redis"]
+    },
+    {
+      "name": "Echo",
+      "blurb": "The AI droid living on this portfolio — tool-calling agent with live GitHub access, a hot-read resume, and per-visitor memory.",
+      "stack": ["Node.js", "Groq", "Claude", "Express"]
     },
     {
       "name": "NanoBot",
       "blurb": "Personal AI assistant trained on his life, skills, and philosophy.",
       "stack": ["LLM", "RAG", "NestJS", "Vector DB"]
-    },
-    {
-      "name": "FORGE",
-      "blurb": "MCP server toolkit — 6 tools for AI agent orchestration.",
-      "stack": ["MCP", "TypeScript", "SDK"]
     }
   ],
-  "resumeUrl": null
+  "education": {
+    "degree": "B.Tech, Mechanical Engineering",
+    "school": "GITAM School of Technology, Bangalore",
+    "years": "2014 - 2018"
+  },
+  "resumeUrl": "https://deal.maya-ai.dev/resume.pdf"
 }
