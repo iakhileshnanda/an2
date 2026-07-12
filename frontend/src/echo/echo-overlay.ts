@@ -192,6 +192,8 @@ const CSS = `
   transform: translate(-50%, -100%);
   opacity: 0;
   transition: opacity 0.2s ease;
+  pointer-events: auto;
+  user-select: text;
 }
 #${ROOT_ID} .eo-bubble.eo-on { opacity: 1; }
 
@@ -313,9 +315,31 @@ export function initEchoOverlay(): EchoOverlayHandle {
   showIdleLine()
   idleTimer = setTimeout(rotateIdle, IDLE_ROTATE_MS)
 
+  function renderBubbleText(text: string) {
+    const urlRe = /(https?:\/\/[^\s]+)/g
+    const parts = text.split(urlRe)
+    bubbleText.innerHTML = ''
+    parts.forEach((part) => {
+      if (/^https?:\/\//.test(part)) {
+        const clean = part.replace(/[*_.,'";:!?)]+$/, '')
+        const trailing = part.slice(clean.length)
+        const a = document.createElement('a')
+        a.href = clean
+        a.textContent = clean
+        a.target = '_blank'
+        a.rel = 'noopener noreferrer'
+        a.style.cssText = 'color:inherit;text-decoration:underline;cursor:pointer;'
+        bubbleText.appendChild(a)
+        if (trailing) bubbleText.appendChild(document.createTextNode(trailing))
+      } else {
+        bubbleText.appendChild(document.createTextNode(part))
+      }
+    })
+  }
+
   // ── bubble ──
   function showBubble(text: string, dismissMs: number = BUBBLE_DISMISS_MS) {
-    bubbleText.textContent = text
+    renderBubbleText(text)
     bubbleVisible = true
     bubbleEl.classList.add('eo-on')
     if (bubbleTimer) clearTimeout(bubbleTimer)
