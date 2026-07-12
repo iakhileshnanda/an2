@@ -32,8 +32,8 @@ const changelog: Array<{ date: string; month: string; items: string[] }> = Array
    --color-white (Cotton).
    ============================================================================ */
 
-// The droid sprite wrapper carries aria-label="Echo" (see character/Echo.tsx).
-const DROID_SELECTOR = '[aria-label="Echo"]'
+// The droid sprite wrapper carries aria-label="Maya" (see character/Echo.tsx).
+const DROID_SELECTOR = '[aria-label="Maya"]'
 
 // Where, as a fraction of the droid's bounding box height, the visible art's
 // "head" (bubble anchor) and "feet" (idle/trail/input anchor) sit. The 32px
@@ -64,7 +64,7 @@ const OFFLINE_REPLY = 'offline. reach akhilesh: theakhileshnanda@gmail.com'
 // What Echo actually does — shown on first visit and via /help. Kept honest:
 // every line maps to a real capability (tools, memory, resume link).
 const CAPABILITIES =
-  "i'm echo. akhilesh built me.\n" +
+  "i'm maya. akhilesh built me.\n" +
   'i can:\n' +
   '• pull his live github activity\n' +
   '• walk you through any project\n' +

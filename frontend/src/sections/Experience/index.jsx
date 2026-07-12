@@ -181,7 +181,7 @@ export default function Experience() {
               onClick={() => askEcho(entry.echoPrompt)}
               className="mt-6 font-code text-xs tracking-widest text-[#810100] uppercase hover:opacity-60 transition-opacity"
             >
-              ask echo →
+              ask maya →
             </button>
           )}
         </YearBlock>

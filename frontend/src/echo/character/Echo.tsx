@@ -75,7 +75,7 @@ export default function Echo() {
         style={{ cursor: 'pointer' }}
         onClick={onSpriteClick}
         role="button"
-        aria-label="Echo"
+        aria-label="Maya"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSpriteClick() }}
       >

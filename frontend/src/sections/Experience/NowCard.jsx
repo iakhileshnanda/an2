@@ -79,7 +79,7 @@ export default function NowCard() {
             </>
           ) : (
             <p className="font-body text-sm text-[#1B1716]/50 leading-relaxed">
-              shipping quietly — ask echo what's new.
+              shipping quietly — ask maya what's new.
             </p>
           )}
         </div>
@@ -104,7 +104,7 @@ export default function NowCard() {
         onClick={() => askEcho(nowFallback.echoPrompt)}
         className="mt-6 font-code text-xs tracking-widest text-[#810100] uppercase hover:opacity-60 transition-opacity"
       >
-        ask echo →
+        ask maya →
       </button>
     </motion.div>
   );
