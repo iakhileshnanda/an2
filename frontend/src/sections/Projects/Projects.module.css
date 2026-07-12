@@ -25,4 +25,45 @@
   display: block;
   padding: 0;
   height: auto;
+  position: relative;
+}
+
+/* ── collapse-on-stack ─────────────────────────────────────────────────────
+   ScrollStack drives --collapse (0 → 1) on the card as the next card arrives,
+   and clips the card to a 64px row. The full content sinks out early; the
+   archive row surfaces late — the two never fight mid-morph. All scroll-
+   linked (no transitions), so scrolling back up plays it in reverse. */
+
+.fullContent {
+  opacity: calc(1 - var(--collapse, 0) * 1.8);
+  transform: translateY(calc(var(--collapse, 0) * -12px));
+}
+:global(.scroll-stack-card.is-collapsed) .fullContent {
+  pointer-events: none;
+}
+
+.collapsedRow {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  opacity: calc((var(--collapse, 0) - 0.45) / 0.4);
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .collapsedRow { gap: 24px; padding: 0 40px; }
+}
+
+/* single-line summary, truncated — the row must never wrap */
+.rowSummary {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@media (max-width: 767px) {
+  .rowSummary { display: none; }
 }

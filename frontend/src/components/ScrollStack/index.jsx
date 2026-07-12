@@ -23,6 +23,13 @@ const ScrollStack = ({
   rotationAmount = 0,
   blurAmount = 0,
   useWindowScroll = false,
+  // Collapse-on-stack: when > 0, each card (except the last) morphs into a
+  // compact row of this height as the NEXT card arrives. Driven by a --collapse
+  // CSS variable (0..1) + a bottom clip-path — no layout change, so the
+  // offsetTop-based pin math stays stable. collapseLead is how many px of
+  // scroll the morph is spread over before the next card lands.
+  collapseRowHeight = 0,
+  collapseLead = 300,
   onStackComplete
 }) => {
   const scrollerRef = useRef(null);
@@ -139,11 +146,25 @@ const ScrollStack = ({
         translateY = pinEnd - cardTop + stackPositionPx + itemStackDistance * i;
       }
 
+      // Collapse progress: card i folds into a row as card i+1 approaches its
+      // own pin point, finishing right as it lands. The last card never
+      // collapses — it stays the full, focused card of the final composition.
+      let collapse = 0;
+      if (collapseRowHeight > 0 && i < cardsRef.current.length - 1) {
+        const nextCard = cardsRef.current[i + 1];
+        if (nextCard) {
+          const nextTriggerStart =
+            getElementOffset(nextCard) - stackPositionPx - itemStackDistance * (i + 1);
+          collapse = calculateProgress(scrollTop, nextTriggerStart - collapseLead, nextTriggerStart);
+        }
+      }
+
       const newTransform = {
         translateY: Math.round(translateY * 100) / 100,
         scale: Math.round(scale * 1000) / 1000,
         rotation: Math.round(rotation * 100) / 100,
-        blur: Math.round(blur * 100) / 100
+        blur: Math.round(blur * 100) / 100,
+        collapse: Math.round(collapse * 1000) / 1000
       };
 
       const lastTransform = lastTransformsRef.current.get(i);
@@ -152,7 +173,8 @@ const ScrollStack = ({
         Math.abs(lastTransform.translateY - newTransform.translateY) > 0.1 ||
         Math.abs(lastTransform.scale - newTransform.scale) > 0.001 ||
         Math.abs(lastTransform.rotation - newTransform.rotation) > 0.1 ||
-        Math.abs(lastTransform.blur - newTransform.blur) > 0.1;
+        Math.abs(lastTransform.blur - newTransform.blur) > 0.1 ||
+        Math.abs((lastTransform.collapse ?? 0) - newTransform.collapse) > 0.002;
 
       if (hasChanged) {
         const transform = `translate3d(0, ${newTransform.translateY}px, 0) scale(${newTransform.scale}) rotate(${newTransform.rotation}deg)`;
@@ -160,6 +182,10 @@ const ScrollStack = ({
 
         card.style.transform = transform;
         card.style.filter = filter;
+        if (collapseRowHeight > 0) {
+          card.style.setProperty('--collapse', String(newTransform.collapse));
+          card.classList.toggle('is-collapsed', newTransform.collapse > 0.5);
+        }
 
         lastTransformsRef.current.set(i, newTransform);
       }
@@ -185,6 +211,8 @@ const ScrollStack = ({
     rotationAmount,
     blurAmount,
     useWindowScroll,
+    collapseRowHeight,
+    collapseLead,
     onStackComplete,
     calculateProgress,
     parsePercentage,
@@ -274,6 +302,13 @@ const ScrollStack = ({
       if (i < cards.length - 1) {
         card.style.marginBottom = `${itemDistance}px`;
       }
+      if (collapseRowHeight > 0 && i < cards.length - 1) {
+        // Static clip expression — only the --collapse variable animates.
+        // Clipping (not resizing) keeps the card's layout height constant so
+        // the offsetTop pin math never shifts mid-scroll.
+        card.style.setProperty('--collapse', '0');
+        card.style.clipPath = `inset(0 0 calc((100% - ${collapseRowHeight}px) * var(--collapse, 0)) 0 round 28px)`;
+      }
       card.style.willChange = 'transform, filter';
       card.style.transformOrigin = 'top center';
       card.style.backfaceVisibility = 'hidden';
@@ -310,6 +345,7 @@ const ScrollStack = ({
     rotationAmount,
     blurAmount,
     useWindowScroll,
+    collapseRowHeight,
     onStackComplete,
     setupLenis,
     updateCardTransforms

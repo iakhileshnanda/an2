@@ -18,8 +18,30 @@ function ProjectCard({ project, index }) {
       forceFallback
       className={styles.projectGlass}
     >
+      {/* Archive row — the card's collapsed form. Fades in via --collapse as
+          the next card stacks on top; aria-hidden because it duplicates the
+          full content below. */}
+      <div className={styles.collapsedRow} aria-hidden="true">
+        <span
+          className={`font-code text-xs tracking-widest ${
+            project.featured ? 'text-[#810100]' : 'text-[#1B1716]/35'
+          }`}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <span className="font-monument text-lg md:text-xl leading-none text-[#1B1716] whitespace-nowrap">
+          {project.name}
+        </span>
+        <span className={`font-body text-sm text-[#1B1716]/55 ${styles.rowSummary}`}>
+          {project.description}
+        </span>
+        <span className="font-code text-[10px] tracking-widest uppercase text-[#1B1716]/45 ml-auto whitespace-nowrap hidden md:inline">
+          {project.company}
+        </span>
+      </div>
+
       <div
-        className="p-8 md:p-14 min-h-[44vh] md:min-h-[420px] flex flex-col"
+        className={`p-8 md:p-14 min-h-[44vh] md:min-h-[420px] flex flex-col ${styles.fullContent}`}
         data-interactive
       >
         {/* index number · name — company */}
@@ -84,15 +106,21 @@ export default function Projects() {
         </motion.h2>
 
         {/* itemDistance is viewport-scale so cards arrive one at a time —
-            each card gets its own stretch of scroll before the next stacks */}
+            each card gets its own stretch of scroll before the next stacks.
+            itemStackDistance = collapsed row height (64) + breathing room, so
+            stacked cards read as archive rows one under the other; scale is
+            near-uniform (0.96 → 0.985) for a hint of paper-stack depth
+            without rows visibly shrinking. */}
         <ScrollStack
           useWindowScroll
           itemDistance={300}
-          itemScale={0.04}
-          itemStackDistance={18}
-          stackPosition="12%"
-          scaleEndPosition="6%"
-          baseScale={0.82}
+          itemScale={0.005}
+          itemStackDistance={74}
+          stackPosition="10%"
+          scaleEndPosition="5%"
+          baseScale={0.96}
+          collapseRowHeight={64}
+          collapseLead={300}
         >
           {projects.map((project, i) => (
             <ScrollStackItem key={project.id}>
