@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const RESUME_PATH = path.join(__dirname, '..', 'content', 'resume.json');
+const PROJECTS_DIR = path.join(__dirname, '..', 'content', 'projects');
 
 // --- Tool definitions sent to the model -------------------------------------
 const TOOL_DEFS = [
@@ -29,6 +30,22 @@ const TOOL_DEFS = [
       "Read Akhilesh's current structured résumé: summary, skills, experience, projects, contact links, availability, and résumé URL. Call this when the visitor asks about his background, experience, skills, stack, availability, or wants the resume/CV. The data is current — prefer it over anything you remember.",
     input_schema: { type: 'object', properties: {}, additionalProperties: false },
   },
+  {
+    name: 'get_project',
+    description:
+      "Deep-dive on ONE of Akhilesh's projects: the problem it solves, how it works, why it's interesting, and what to highlight. Call this whenever the visitor asks how a specific project works, wants detail beyond the one-line blurb, or asks which project to look at first. Pass `name` (e.g. \"wing-man\", \"ghost\", \"echo\", \"maya miro\") — fuzzy matching is fine. Omit `name` to get the list of projects that have a deep dive. Prefer this over get_resume when the question is about a single project.",
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description:
+            'Project name or a close guess. Omit to list all projects that have a deep dive.',
+        },
+      },
+      additionalProperties: false,
+    },
+  },
 ];
 
 // Per-tool presentation metadata, surfaced to the frontend for the
@@ -36,6 +53,7 @@ const TOOL_DEFS = [
 const TOOL_STATUS = {
   get_github_activity: 'SEARCHING GITHUB...',
   get_resume: 'READING RESUME...',
+  get_project: 'PULLING PROJECT FILE...',
 };
 
 // --- Tool implementations ---------------------------------------------------
@@ -148,9 +166,63 @@ function getResume() {
   return { type: 'resume', ...data };
 }
 
+// Project deep dives live as markdown files in content/projects/. Read fresh
+// from disk every call (same hot-read contract as resume.json): drop a new .md
+// in and it's live, no restart. Each file's second line may carry
+// "aliases: a, b, c" for fuzzy matching.
+function readProjectIndex() {
+  let files = [];
+  try {
+    files = fs.readdirSync(PROJECTS_DIR).filter((f) => f.endsWith('.md'));
+  } catch {
+    return [];
+  }
+  return files.map((file) => {
+    const slug = file.replace(/\.md$/, '');
+    const raw = fs.readFileSync(path.join(PROJECTS_DIR, file), 'utf8');
+    const lines = raw.split('\n');
+    const title = (lines[0] || '').replace(/^#\s*/, '').trim() || slug;
+    const aliasLine = lines.find((l) => l.startsWith('aliases:'));
+    const aliases = aliasLine
+      ? aliasLine.slice('aliases:'.length).split(',').map((a) => a.trim().toLowerCase()).filter(Boolean)
+      : [];
+    return { slug, title, aliases, raw };
+  });
+}
+
+function getProject({ name } = {}) {
+  const index = readProjectIndex();
+  const list = index.map((p) => ({ slug: p.slug, title: p.title }));
+
+  const q = typeof name === 'string' ? name.trim().toLowerCase() : '';
+  if (!q) return { type: 'project_list', projects: list };
+
+  const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const nq = norm(q);
+  const match =
+    index.find((p) => norm(p.slug) === nq || norm(p.title) === nq) ||
+    index.find((p) => p.aliases.some((a) => norm(a) === nq)) ||
+    index.find(
+      (p) =>
+        norm(p.slug).includes(nq) ||
+        norm(p.title).includes(nq) ||
+        p.aliases.some((a) => norm(a).includes(nq) || nq.includes(norm(a)))
+    );
+
+  if (!match) {
+    return {
+      type: 'project_list',
+      note: `no deep dive matched "${name}" — these are available`,
+      projects: list,
+    };
+  }
+  return { type: 'project', slug: match.slug, title: match.title, markdown: match.raw };
+}
+
 const TOOL_IMPLS = {
   get_github_activity: getGithubActivity,
   get_resume: getResume,
+  get_project: getProject,
 };
 
 module.exports = { TOOL_DEFS, TOOL_IMPLS, TOOL_STATUS };

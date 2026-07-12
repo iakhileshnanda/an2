@@ -3,9 +3,11 @@
   "title": "Senior Frontend Engineer / Tech Lead / AI Builder",
   "location": "Bangalore, India",
   "summary": "Senior frontend engineer and tech lead with 6+ years shipping scalable Angular (2-20) applications and AI-powered products across fintech and enterprise. Started as a mechanical engineer with zero programming background, self-taught into production frontend, now leads a fintech frontend team by day and builds multi-agent systems, LLM pipelines, and autonomous tools by night. Builds the thing, not the slide deck.",
-  "availability": "Targeting Senior Frontend Engineer, Full Stack Engineer, Tech Lead, or AI Builder roles.",
+  "availability": "Actively looking — can join within 30 days. Targeting Senior Frontend Engineer, Full Stack Engineer, Tech Lead, or AI Builder roles.",
+  "compensation": "Targeting 18-30 LPA depending on role and scope.",
   "contact": {
     "email": "theakhileshnanda@gmail.com",
+    "phone": "+91 7416063546",
     "github": "https://github.com/iakhileshnanda",
     "linkedin": "https://linkedin.com/in/theakhileshnanda",
     "website": "https://akhileshnanda.maya-ai.dev"
@@ -37,30 +39,59 @@
   ],
   "projects": [
     {
-      "name": "Maya MIRO",
-      "blurb": "Multi-agent market simulation — hundreds of AI investor personas debate on a simulated social feed to predict sentiment.",
-      "stack": ["Python", "Neo4j", "NVIDIA NIM", "GraphRAG", "CAMEL-OASIS"],
-      "link": "https://github.com/iakhileshnanda/myMayaMIRO"
+      "name": "Wing-Man",
+      "blurb": "Desktop P2P screen overlay with real-time AI coaching for job interviews. Three-tier pricing (free / P2P / relay), live on Oracle Cloud.",
+      "stack": ["Node.js", "WebSockets", "Electron overlay", "Oracle Cloud", "Cloudflare"],
+      "status": "Live"
     },
     {
-      "name": "AI Code Generation Framework",
-      "blurb": "Cursor IDE rule system with a 10-phase AI-assisted workflow, reusable Angular component guides, and automated feature registration — adopted as the team standard at Trustt.",
-      "stack": ["Cursor IDE", "Angular", "AI-assisted development"]
-    },
-    {
-      "name": "Oracle",
-      "blurb": "LLM-powered job intelligence system — parses job descriptions, scores candidate fit, delivers ranked alerts.",
-      "stack": ["Node.js", "Python", "Groq", "Cerebras", "PostgreSQL", "Redis"]
+      "name": "Ghost",
+      "blurb": "Two-laptop latency measurement rig — screen capture, audio loopback, real-time message overlay. The engineering testbed behind Wing-Man.",
+      "stack": ["Node.js", "WebSockets", "screen capture APIs", "Oracle Cloud"],
+      "status": "Built"
     },
     {
       "name": "Echo",
-      "blurb": "The AI droid living on this portfolio — tool-calling agent with live GitHub access, a hot-read resume, and per-visitor memory.",
-      "stack": ["Node.js", "Groq", "Claude", "Express"]
+      "blurb": "The AI droid living on this portfolio — tool-calling agent with live GitHub access, a hot-read resume, per-project deep dives, and per-visitor memory.",
+      "stack": ["Node.js", "Groq", "Claude", "Express"],
+      "status": "Live"
     },
     {
-      "name": "NanoBot",
-      "blurb": "Personal AI assistant trained on his life, skills, and philosophy.",
-      "stack": ["LLM", "RAG", "NestJS", "Vector DB"]
+      "name": "Maya / NanoBot",
+      "blurb": "Personal AI platform running a fleet of autonomous agents 24/7 — LinkedIn auto-poster, GitHub poster, Telegram job-hunting bot — self-hosted for free on Oracle Cloud.",
+      "stack": ["Node.js", "NVIDIA NIM", "PM2", "Oracle Cloud", "Telegram Bot API"],
+      "status": "Live"
+    },
+    {
+      "name": "Maya MIRO",
+      "blurb": "Multi-agent market simulation — hundreds of AI investor personas debate on a simulated social feed to predict sentiment.",
+      "stack": ["Python", "Neo4j", "NVIDIA NIM", "GraphRAG", "CAMEL-OASIS"],
+      "link": "https://github.com/iakhileshnanda/myMayaMIRO",
+      "status": "Built"
+    },
+    {
+      "name": "DevBrain / Engram",
+      "blurb": "Personal developer memory system — SQLite + ChromaDB vector search behind an MCP server, so any MCP-aware agent can recall prior decisions and code. Built end-to-end in a single Claude Code session.",
+      "stack": ["SQLite", "ChromaDB", "MCP Server", "Node.js"],
+      "status": "Built"
+    },
+    {
+      "name": "AI Loan Discovery Platform",
+      "blurb": "RAG-based loan matching for the Indian market — Claude API over a retrieval pipeline, with a planned fine-tuning path once real user data lands.",
+      "stack": ["RAG pipeline", "Claude API", "Node.js", "Python"],
+      "status": "In Progress"
+    },
+    {
+      "name": "Oracle (Job Intelligence)",
+      "blurb": "LLM-powered job intelligence system — parses job descriptions, scores candidate fit with NLP, delivers ranked alerts.",
+      "stack": ["Node.js", "Python", "Groq", "Cerebras", "PostgreSQL", "Redis"],
+      "status": "Built"
+    },
+    {
+      "name": "AI Code Generation Framework",
+      "blurb": "Cursor IDE rule system with a 10-phase AI-assisted workflow, reusable Angular component guides, and automated feature registration — adopted as the team standard at Trustt. Behind the 35% velocity gain.",
+      "stack": ["Cursor IDE", "Angular", "AI-assisted development"],
+      "status": "Live"
     }
   ],
   "education": {

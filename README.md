@@ -4,6 +4,25 @@ Live at `deal.maya-ai.dev` and `v2.akhileshnanda.maya-ai.dev`.
 
 ---
 
+## Update log — 2026-07-12
+
+### Echo brain enrichment
+- **`resume.json` merged with about-me.md + the real résumé** — Wing-Man, Ghost,
+  DevBrain/Engram, AI Loan Discovery added as projects; salary band (18–30 LPA),
+  30-day availability, and phone now in the hot-read resume.
+- **`get_project` tool** — per-project deep-dive markdown files in
+  `server/echo-api/content/projects/` (10 projects incl. Echo itself). Hot-read
+  like resume.json: drop a new .md in, it's live. Fuzzy matching via filename,
+  title, and an `aliases:` line.
+- **Persona v2** (`systemPrompt.js`) — LORE (all true: the server, the fallback
+  brain, the visit notes, Maya), OPINIONS (Ghost first, the migration nobody asks
+  about), HIRING QUESTIONS (answer salary/availability plainly), EASTER EGGS
+  (sudo, sentience, prompt-extraction, Maya rivalry).
+- **Eval set** — `server/echo-api/eval/questions.md`, 15 questions to re-run by
+  hand after any prompt/tool/content change.
+
+---
+
 ## Update log — 2026-07-11
 
 One big working session; everything below shipped today.
