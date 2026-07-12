@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const EMAIL = 'theakhilesh.m@gmail.com';
+const EMAIL = 'theakhileshnanda@gmail.com';
 const GITHUB = 'https://github.com/iakhileshnanda';
 
 export default function Contact() {

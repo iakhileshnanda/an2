@@ -59,7 +59,7 @@ const IDLE_LINES = [
   "i'll tell you what he ships.",
 ]
 
-const OFFLINE_REPLY = 'offline. reach akhilesh: theakhilesh.m@gmail.com'
+const OFFLINE_REPLY = 'offline. reach akhilesh: theakhileshnanda@gmail.com'
 
 // What Echo actually does — shown on first visit and via /help. Kept honest:
 // every line maps to a real capability (tools, memory, resume link).

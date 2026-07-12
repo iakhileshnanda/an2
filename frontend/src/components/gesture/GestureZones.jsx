@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './GestureZones.module.css';
 
-const EMAIL = 'theakhilesh.m@gmail.com';
+const EMAIL = 'theakhileshnanda@gmail.com';
 const GITHUB = 'https://github.com/iakhileshnanda';
 
 export default function GestureZones() {
