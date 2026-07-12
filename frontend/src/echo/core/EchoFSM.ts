@@ -86,14 +86,17 @@ export function transition(ctx: FSMContext, event: FSMEvent): FSMContext {
   }
 }
 
+// Calm distribution: mostly walk or stand, occasionally doze. Jump/squish are
+// rare punctuation (~1 in 17 ticks — a few minutes apart at the roam cadence),
+// not a constant tic.
 function roamNext(current: BotState): { next: BotState; facing: boolean; speed: FSMContext['speed'] } {
   const roll = Math.random()
   const facing = Math.random() > 0.5
   if (current === 'SLEEPING') return { next: 'IDLE', facing, speed: 'slow' }
-  if (roll < 0.50) return { next: 'ROAMING',  facing, speed: randomSpeed() }
-  if (roll < 0.70) return { next: 'IDLE',     facing, speed: 'normal' }
-  if (roll < 0.85) return { next: 'SLEEPING', facing, speed: 'slow' }
-  if (roll < 0.95) return { next: 'JUMPING',  facing, speed: 'normal' }
+  if (roll < 0.45) return { next: 'ROAMING',  facing, speed: randomSpeed() }
+  if (roll < 0.80) return { next: 'IDLE',     facing, speed: 'normal' }
+  if (roll < 0.94) return { next: 'SLEEPING', facing, speed: 'slow' }
+  if (roll < 0.98) return { next: 'JUMPING',  facing, speed: 'normal' }
   return { next: 'SQUISH', facing, speed: 'normal' }
 }
 

@@ -1,6 +1,6 @@
 export const MARGIN = 16
-export const ROAM_DELAY_MIN = 3000
-export const ROAM_DELAY_MAX = 5000
+export const ROAM_DELAY_MIN = 6000
+export const ROAM_DELAY_MAX = 11000
 export const IDLE_HINT_DELAY = 60_000
 export const HINT_AUTODISMISS = 5000
 export const LEAVE_DURATION = 1800

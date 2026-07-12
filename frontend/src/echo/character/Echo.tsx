@@ -15,6 +15,10 @@ export default function Echo() {
 
   return (
     <motion.div
+      // initial={false}: first paint snaps straight to the spawn position —
+      // without it framer-motion animates from (0,0) and the droid visibly
+      // flies in from the top-left corner on page load.
+      initial={false}
       animate={{ x: pos.x, y: pos.y }}
       transition={
         moveDuration > 0 ? { duration: moveDuration, ease: 'linear' } : { duration: 0 }

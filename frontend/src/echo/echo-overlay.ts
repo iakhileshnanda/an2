@@ -51,14 +51,27 @@ const IDLE_FADE_MS = 450
 const BUBBLE_DISMISS_MS = 8000
 
 const IDLE_LINES = [
-  'ask me anything.',
-  'i know this guy.',
-  'go on, try me.',
+  'i pull his github live. ask.',
+  'i know every project here.',
+  'resume? i hand those out.',
+  'i remember return visitors.',
+  'type /help to see what i do.',
   "i'll tell you what he ships.",
-  'still here. still curious?',
 ]
 
 const OFFLINE_REPLY = 'offline. reach akhilesh: theakhilesh.m@gmail.com'
+
+// What Echo actually does — shown on first visit and via /help. Kept honest:
+// every line maps to a real capability (tools, memory, resume link).
+const CAPABILITIES =
+  "i'm echo. akhilesh built me.\n" +
+  'i can:\n' +
+  '• pull his live github activity\n' +
+  '• walk you through any project\n' +
+  '• hand over the resume\n' +
+  '• answer salary + availability\n' +
+  '• remember you next visit\n' +
+  'click me, then just ask.'
 
 const STYLE_ID = 'echo-overlay-style'
 const ROOT_ID = 'echo-overlay-root'
@@ -301,12 +314,12 @@ export function initEchoOverlay(): EchoOverlayHandle {
   idleTimer = setTimeout(rotateIdle, IDLE_ROTATE_MS)
 
   // ── bubble ──
-  function showBubble(text: string) {
+  function showBubble(text: string, dismissMs: number = BUBBLE_DISMISS_MS) {
     bubbleText.textContent = text
     bubbleVisible = true
     bubbleEl.classList.add('eo-on')
     if (bubbleTimer) clearTimeout(bubbleTimer)
-    bubbleTimer = setTimeout(hideBubble, BUBBLE_DISMISS_MS)
+    bubbleTimer = setTimeout(hideBubble, dismissMs)
   }
   function hideBubble() {
     bubbleVisible = false
@@ -337,6 +350,11 @@ export function initEchoOverlay(): EchoOverlayHandle {
   }
 
   function submit(value: string) {
+    // /help is answered locally — no API round-trip for a static list
+    if (/^\/?help$/i.test(value.trim())) {
+      showBubble(CAPABILITIES, 15000)
+      return
+    }
     hideBubble() // dismiss previous reply on next input
     showBubble('…')
     // send prior turns only — the backend appends the current message itself
@@ -401,17 +419,29 @@ export function initEchoOverlay(): EchoOverlayHandle {
     sendLeaving(history)
   }
 
-  // ── returning visitor greeting ──
-  // If this visitor has been here before and the changelog has entries newer
-  // than their last visit, greet them once with what shipped since.
+  // ── greetings ──
+  // First visit: Echo introduces itself once with its capability list.
+  // Returning visit: if the changelog has entries newer than the visitor's
+  // last visit, greet them once with what shipped since.
   const LAST_SEEN_KEY = 'echo_last_seen'
+  const INTRO_KEY = 'echo_intro_shown'
   let greetTimer: ReturnType<typeof setTimeout> | null = null
   function scheduleReturningGreeting() {
     try {
       const visits = parseInt(localStorage.getItem('echo_visit_count') || '1', 10) || 1
       const lastSeen = localStorage.getItem(LAST_SEEN_KEY)
       localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString())
-      if (visits <= 1) return
+      if (visits <= 1) {
+        // introduce once, ever — a returning visitor already knows the drill
+        if (!localStorage.getItem(INTRO_KEY)) {
+          localStorage.setItem(INTRO_KEY, '1')
+          greetTimer = setTimeout(() => {
+            if (inputVisible || bubbleVisible) return // don't interrupt
+            showBubble(CAPABILITIES, 15000)
+          }, 4000)
+        }
+        return
+      }
 
       // changelog dates are "YYYY-MM" — string compare works
       const fresh = lastSeen
