@@ -44,6 +44,77 @@ function textFromAnthropicContent(content) {
 
 // --- Groq tool loop (OpenAI-compatible) -------------------------------------
 
+// llama-3.3 on Groq sometimes emits the tool call as raw text
+// ("<function=get_project {\"name\":\"ghost\"}</function>") instead of a proper
+// tool_calls block. Groq rejects that with a 400 code=tool_use_failed but hands
+// back the malformed text in failed_generation — parse the intent out of it and
+// synthesize the tool_calls message the model meant to send.
+function recoverMalformedToolCall(err) {
+  const body = err && err.error;
+  const failed =
+    (body && body.error && body.error.failed_generation) ||
+    (body && body.failed_generation);
+  if (typeof failed !== 'string') return null;
+
+  const m = failed.match(/<function=([\w-]+)[\s(>=]*(\{[\s\S]*?\})/);
+  if (!m || !TOOL_IMPLS[m[1]]) return null;
+
+  let args;
+  try {
+    args = JSON.parse(m[2]);
+  } catch {
+    return null;
+  }
+
+  return {
+    role: 'assistant',
+    content: null,
+    tool_calls: [
+      {
+        id: `recovered_${Date.now()}`,
+        type: 'function',
+        function: { name: m[1], arguments: JSON.stringify(args) },
+      },
+    ],
+  };
+}
+
+function isToolUseFailed(err) {
+  const body = err && err.error;
+  const code = (body && body.error && body.error.code) || (body && body.code);
+  return err && err.status === 400 && code === 'tool_use_failed';
+}
+
+// One Groq round: returns { message, finish_reason }. Recovers malformed tool
+// calls from the 400 body; if unparseable, retries the round once (the flake is
+// stochastic) before giving up.
+async function groqRound(convo, { retried = false } = {}) {
+  try {
+    const res = await getGroq().chat.completions.create({
+      model: GROQ_MODEL,
+      max_tokens: MAX_TOKENS,
+      temperature: 0.6,
+      tools: GROQ_TOOL_DEFS,
+      tool_choice: 'auto',
+      messages: convo,
+    });
+    return { message: res.choices[0].message, finish_reason: res.choices[0].finish_reason };
+  } catch (err) {
+    if (isToolUseFailed(err)) {
+      const recovered = recoverMalformedToolCall(err);
+      if (recovered) {
+        console.warn('[echo] recovered malformed Groq tool call:', recovered.tool_calls[0].function.name);
+        return { message: recovered, finish_reason: 'tool_calls' };
+      }
+      if (!retried) {
+        console.warn('[echo] Groq tool_use_failed (unrecoverable), retrying round once');
+        return groqRound(convo, { retried: true });
+      }
+    }
+    throw err;
+  }
+}
+
 async function runModelGroq({ system, messages }) {
   // Build OpenAI-style message list: system + history
   const convo = [
@@ -56,16 +127,7 @@ async function runModelGroq({ system, messages }) {
   let final = null;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
-    const res = await getGroq().chat.completions.create({
-      model: GROQ_MODEL,
-      max_tokens: MAX_TOKENS,
-      tools: GROQ_TOOL_DEFS,
-      tool_choice: 'auto',
-      messages: convo,
-    });
-
-    const msg = res.choices[0].message;
-    const stopReason = res.choices[0].finish_reason;
+    const { message: msg, finish_reason: stopReason } = await groqRound(convo);
 
     if (stopReason === 'tool_calls' && Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
       convo.push(msg);
@@ -100,7 +162,11 @@ async function runModelGroq({ system, messages }) {
     break;
   }
 
-  const reply = final ? (final.content || '') : '';
+  // Safety net: if malformed tool syntax leaked into the visible reply text,
+  // strip it rather than showing the visitor raw <function=...> markup.
+  const reply = final
+    ? (final.content || '').replace(/<function=[\s\S]*?(<\/function>|$)/g, '').trim()
+    : '';
   return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
 }
 
@@ -155,11 +221,20 @@ async function runModelAnthropic({ system, messages }) {
 
 // --- Provider wrapper: Groq first, Anthropic fallback -----------------------
 
+// Anthropic is optional — we only try the fallback when a real-looking key is
+// present, so a placeholder/absent key surfaces the actual Groq error instead
+// of a guaranteed auth failure.
+function anthropicAvailable() {
+  const key = process.env.ANTHROPIC_API_KEY || '';
+  return key.startsWith('sk-ant-');
+}
+
 async function runModel(opts) {
   if (process.env.GROQ_API_KEY) {
     try {
       return await runModelGroq(opts);
     } catch (err) {
+      if (!anthropicAvailable()) throw err;
       console.warn('[echo] Groq failed, falling back to Anthropic:', err.message);
     }
   }
