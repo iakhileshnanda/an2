@@ -1,4 +1,4 @@
-import { sendToEcho, sendLeaving } from './chat/chatService'
+import { sendToEchoStream, sendLeaving } from './chat/chatService'
 import type { HistoryItem } from './chat/chatService'
 // @ts-ignore — editorial JSON lives outside src/; resolved by the @content alias
 import changelogJson from '@content/changelog.json'
@@ -342,7 +342,19 @@ export function initEchoOverlay(): EchoOverlayHandle {
     // send prior turns only — the backend appends the current message itself
     const past = history.slice()
     pushHistory('user', value)
-    sendToEcho(value, past)
+    // streamed deltas render live in the bubble; the resolved reply is
+    // authoritative and replaces whatever was streamed (they normally match)
+    let streamed = ''
+    sendToEchoStream(value, past, {
+      onStatus: (status) => {
+        streamed = '' // a tool round restarts the visible reply
+        showBubble(status)
+      },
+      onDelta: (text) => {
+        streamed += text
+        showBubble(streamed)
+      },
+    })
       .then((r) => {
         if (r.reply) pushHistory('assistant', r.reply)
         showBubble(r.reply || OFFLINE_REPLY)

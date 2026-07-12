@@ -6,7 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
-const { handleEcho, GROQ_MODEL, ANTHROPIC_MODEL } = require('./src/echo');
+const { handleEcho, handleEchoStream, GROQ_MODEL, ANTHROPIC_MODEL } = require('./src/echo');
 const { getNowSummary } = require('./src/now');
 
 const app = express();
@@ -80,6 +80,38 @@ app.post('/api/echo', echoLimiter, async (req, res) => {
     if (status >= 500) console.error('[echo] error:', err.message);
     res.status(status).json({ error: status === 400 ? err.message : 'Echo is offline right now.' });
   }
+});
+
+// --- Echo's brain, streaming (SSE over POST) ---
+// Events: status (tool running), delta (text chunk, cosmetic), done (authoritative
+// result, same shape as POST /api/echo), error. X-Accel-Buffering tells nginx not
+// to buffer the stream — no nginx config change needed.
+app.post('/api/echo/stream', echoLimiter, async (req, res) => {
+  if (!process.env.GROQ_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'Echo is offline — no API key configured.' });
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  const send = (event, data) => {
+    if (res.writableEnded) return;
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const result = await handleEchoStream(req.body || {}, send);
+    send('done', result);
+  } catch (err) {
+    const status = err.status || 502;
+    if (status >= 500) console.error('[echo] stream error:', err.message);
+    send('error', { error: status === 400 ? err.message : 'Echo is offline right now.' });
+  }
+  res.end();
 });
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

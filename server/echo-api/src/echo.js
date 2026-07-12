@@ -170,6 +170,139 @@ async function runModelGroq({ system, messages }) {
   return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
 }
 
+// --- Groq streaming tool loop ------------------------------------------------
+// Same tool loop as runModelGroq, but with stream: true. Text deltas are
+// forwarded through emit('delta', ...) as they arrive; tool rounds surface as
+// emit('status', ...). Deltas are cosmetic — the returned reply is authoritative
+// and the frontend reconciles against it, which is what lets the malformed
+// tool-call recovery keep working under streaming.
+
+// Hold back this many trailing chars during emission so a partial "<function="
+// at the buffer tail can't leak to the visitor before we can see what it is.
+const STREAM_HOLDBACK = 12;
+
+async function runModelGroqStream({ system, messages }, emit) {
+  const convo = [
+    { role: 'system', content: system },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  let lastToolPayload = null;
+  let lastToolStatus = null;
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
+    let content = '';
+    let emittedLen = 0;
+    let gated = false; // stop emitting the moment malformed tool syntax appears
+    let finish = null;
+    const toolCalls = [];
+    let recovered = null;
+
+    try {
+      const stream = await getGroq().chat.completions.create({
+        model: GROQ_MODEL,
+        max_tokens: MAX_TOKENS,
+        temperature: 0.6,
+        tools: GROQ_TOOL_DEFS,
+        tool_choice: 'auto',
+        stream: true,
+        messages: convo,
+      });
+
+      for await (const chunk of stream) {
+        const choice = chunk.choices && chunk.choices[0];
+        if (!choice) continue;
+        if (choice.finish_reason) finish = choice.finish_reason;
+        const d = choice.delta || {};
+
+        if (Array.isArray(d.tool_calls)) {
+          for (const tc of d.tool_calls) {
+            const i = tc.index || 0;
+            if (!toolCalls[i]) {
+              toolCalls[i] = { id: tc.id || `call_${i}`, type: 'function', function: { name: '', arguments: '' } };
+            }
+            if (tc.id) toolCalls[i].id = tc.id;
+            if (tc.function && tc.function.name) toolCalls[i].function.name += tc.function.name;
+            if (tc.function && tc.function.arguments) toolCalls[i].function.arguments += tc.function.arguments;
+          }
+        }
+
+        if (typeof d.content === 'string' && d.content) {
+          content += d.content;
+          if (!gated && content.includes('<function=')) gated = true;
+          if (!gated && !toolCalls.length) {
+            const safeEnd = content.length - STREAM_HOLDBACK;
+            if (safeEnd > emittedLen) {
+              emit('delta', { text: content.slice(emittedLen, safeEnd) });
+              emittedLen = safeEnd;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      if (!isToolUseFailed(err)) throw err;
+      recovered = recoverMalformedToolCall(err);
+      if (!recovered) throw err;
+      console.warn('[echo] recovered malformed Groq tool call (stream):', recovered.tool_calls[0].function.name);
+    }
+
+    // Malformed tool syntax streamed as plain content — recover from the buffer.
+    if (!recovered && gated && !toolCalls.length) {
+      const m = content.match(/<function=([\w-]+)[\s(>=]*(\{[\s\S]*?\})/);
+      if (m && TOOL_IMPLS[m[1]]) {
+        try {
+          recovered = {
+            role: 'assistant',
+            content: null,
+            tool_calls: [
+              { id: `recovered_${Date.now()}`, type: 'function', function: { name: m[1], arguments: JSON.stringify(JSON.parse(m[2])) } },
+            ],
+          };
+          console.warn('[echo] recovered malformed Groq tool call (content):', m[1]);
+        } catch {
+          /* args unparseable — fall through to a cleaned text reply */
+        }
+      }
+    }
+
+    const activeToolCalls = recovered ? recovered.tool_calls : toolCalls.filter(Boolean);
+
+    if ((finish === 'tool_calls' || recovered) && activeToolCalls.length) {
+      convo.push(
+        recovered || { role: 'assistant', content: content || null, tool_calls: activeToolCalls }
+      );
+
+      for (const tc of activeToolCalls) {
+        const impl = TOOL_IMPLS[tc.function.name];
+        const status = TOOL_STATUS[tc.function.name];
+        if (status) emit('status', { status });
+        let result;
+        try {
+          const args = JSON.parse(tc.function.arguments || '{}');
+          result = impl ? await impl(args) : { error: `unknown tool ${tc.function.name}` };
+          if (!result.error) {
+            lastToolPayload = result;
+            lastToolStatus = status || null;
+          }
+        } catch (err) {
+          result = { error: String(err && err.message ? err.message : err) };
+        }
+        convo.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+      }
+      continue;
+    }
+
+    // Final round — flush what was held back, minus any malformed markup.
+    if (!gated && content.length > emittedLen) {
+      emit('delta', { text: content.slice(emittedLen) });
+    }
+    const reply = content.replace(/<function=[\s\S]*?(<\/function>|$)/g, '').trim();
+    return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
+  }
+
+  return { reply: '', payload: lastToolPayload, toolStatus: lastToolStatus };
+}
+
 // --- Anthropic tool loop (fallback) -----------------------------------------
 
 async function runModelAnthropic({ system, messages }) {
@@ -295,4 +428,50 @@ async function handleEcho(body = {}) {
   return out;
 }
 
-module.exports = { handleEcho, GROQ_MODEL, ANTHROPIC_MODEL };
+// Streaming variant of handleEcho for the SSE endpoint. Emits 'delta' and
+// 'status' events through `emit` while the model runs; the returned object is
+// the authoritative result (same shape as handleEcho) for the final 'done'
+// event. The 'leaving' trigger stays on the JSON endpoint — nothing to stream.
+async function handleEchoStream(body = {}, emit) {
+  const { message, history = [], visitorId = null, sessionContext = {} } = body;
+
+  if (typeof message !== 'string' || !message.trim()) {
+    const err = new Error('message required');
+    err.status = 400;
+    throw err;
+  }
+  if (message.length > 1000) {
+    const err = new Error('message too long');
+    err.status = 400;
+    throw err;
+  }
+
+  const stored = visitorId ? await memory.load(visitorId) : null;
+  const returning = !!stored && ((Number(sessionContext.visitCount) || 1) > 1 || !!stored.lastVisitSummary);
+  const system = buildSystemPrompt({ stored, returning, sessionContext, trigger: null });
+
+  const messages = sanitizeHistory(history);
+  messages.push({ role: 'user', content: message });
+
+  let result;
+  if (process.env.GROQ_API_KEY) {
+    try {
+      result = await runModelGroqStream({ system, messages }, emit);
+    } catch (err) {
+      if (!anthropicAvailable()) throw err;
+      console.warn('[echo] Groq stream failed, falling back to Anthropic:', err.message);
+      result = await runModelAnthropic({ system, messages });
+    }
+  } else {
+    result = await runModelAnthropic({ system, messages });
+  }
+
+  if (visitorId) await memory.recordTurn(visitorId, { sessionContext, message });
+
+  const out = { reply: result.reply, nextState: result.payload ? 'PRESENTING' : 'TALKING' };
+  if (result.toolStatus) out.toolStatus = result.toolStatus;
+  if (result.payload) out.structuredPayload = result.payload;
+  return out;
+}
+
+module.exports = { handleEcho, handleEchoStream, GROQ_MODEL, ANTHROPIC_MODEL };
