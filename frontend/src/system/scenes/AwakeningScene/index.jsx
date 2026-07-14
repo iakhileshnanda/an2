@@ -35,19 +35,19 @@ export default function AwakeningScene() {
             className={`font-monument text-white leading-none ${styles.line1}`}
             style={{ y: line1Y, opacity: line1O }}
           >
-            ONE NIGHT.
+            ONE BUILD.
           </motion.h2>
           <motion.h2
             className={`font-monument text-white leading-none ${styles.line2}`}
             style={{ y: line2Y, opacity: line2O }}
           >
-            ZERO BACKEND.
+            100 AI INVESTORS.
           </motion.h2>
           <motion.h2
             className={`font-monument text-white leading-none ${styles.line3}`}
             style={{ y: line3Y, opacity: line3O }}
           >
-            ONE AGENT.
+            ONE SIGNAL.
           </motion.h2>
           <motion.p
             className="font-mono text-sm"
