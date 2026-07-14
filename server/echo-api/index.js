@@ -109,10 +109,16 @@ app.post('/api/echo/stream', echoLimiter, async (req, res) => {
   } catch (err) {
     const status = err.status || 502;
     if (status >= 500) console.error('[echo] stream error:', err.message);
-    send('error', { error: status === 400 ? err.message : 'Echo is offline right now.' });
+    const errorCode = status === 400 ? err.message : isCreditsExhausted(err) ? 'credits_exhausted' : 'offline';
+    send('error', { error: errorCode });
   }
   res.end();
 });
+
+function isCreditsExhausted(err) {
+  const m = (err?.message || '').toLowerCase();
+  return m.includes('429') || m.includes('402') || m.includes('rate') || m.includes('credits') || m.includes('quota');
+}
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 

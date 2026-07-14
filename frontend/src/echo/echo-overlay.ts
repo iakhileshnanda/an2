@@ -60,6 +60,7 @@ const IDLE_LINES = [
 ]
 
 const OFFLINE_REPLY = 'offline. reach akhilesh: theakhileshnanda@gmail.com'
+const CREDITS_REPLY = "akhilesh's api credits ran out. i've flagged it — he'll fix it soon."
 
 // What Echo actually does — shown on first visit and via /help. Kept honest:
 // every line maps to a real capability (tools, memory, resume link).
@@ -401,7 +402,7 @@ export function initEchoOverlay(): EchoOverlayHandle {
         if (r.reply) pushHistory('assistant', r.reply)
         showBubble(r.reply || OFFLINE_REPLY)
       })
-      .catch(() => showBubble(OFFLINE_REPLY))
+      .catch((err: Error) => showBubble(err?.message === 'credits_exhausted' ? CREDITS_REPLY : OFFLINE_REPLY))
   }
 
   function onRealKeydown(e: KeyboardEvent) {
