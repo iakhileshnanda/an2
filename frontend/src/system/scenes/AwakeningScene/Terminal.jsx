@@ -17,6 +17,10 @@ const CODE_LINES = [
   [],
   [['server', 'fn'], ['.listen(', 'dim'], ['3000', 'num'], [')', 'dim'], [';', 'dim']],
   [['// MCP Server running · port 3000 ✓', 'comment']],
+  [],
+  [['// running debate: NVDA · 100 personas spawned...', 'comment']],
+  [['// signal:', 'comment'], ['  BUY', 'str'], ['  confidence:', 'comment'], ['  0.91', 'num'], ['  consensus:', 'comment'], ['  78%', 'num']],
+  [['// built in one night. no backend. just this.', 'comment']],
 ];
 
 const COLOR = {

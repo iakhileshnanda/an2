@@ -25,6 +25,12 @@ export default function AwakeningScene() {
       <div className="w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         {/* Left: Cinematic text */}
         <div className="flex-1 space-y-4">
+          <motion.p
+            className="font-mono text-sm tracking-widest uppercase"
+            style={{ color: '#00FF41', y: line1Y, opacity: line1O }}
+          >
+            maya-miro — multi-agent market simulation
+          </motion.p>
           <motion.h2
             className={`font-monument text-white leading-none ${styles.line1}`}
             style={{ y: line1Y, opacity: line1O }}
@@ -43,6 +49,19 @@ export default function AwakeningScene() {
           >
             ONE AGENT.
           </motion.h2>
+          <motion.p
+            className="font-mono text-sm"
+            style={{ color: '#8b949e', y: line3Y, opacity: line3O }}
+          >
+            100 AI investor personas. one stock debate. one signal.
+          </motion.p>
+          <motion.button
+            className="font-mono text-sm mt-2 underline underline-offset-4 cursor-pointer bg-transparent border-none p-0"
+            style={{ color: '#00FF41', y: line3Y, opacity: line3O }}
+            onClick={() => document.querySelector('[aria-label="Maya"]')?.click()}
+          >
+            ask maya about it →
+          </motion.button>
         </div>
 
         {/* Right: Terminal */}
