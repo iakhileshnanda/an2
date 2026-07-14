@@ -27,7 +27,7 @@ const TOOL_DEFS = [
   {
     name: 'get_resume',
     description:
-      "Read Akhilesh's current structured résumé: summary, skills, experience, projects, contact links, availability, and résumé URL. Call this when the visitor asks about his background, experience, skills, stack, availability, or wants the resume/CV. The data is current — prefer it over anything you remember.",
+      "Read Akhilesh's current structured résumé: summary, skills, experience, projects, contact links, availability, and résumé URL. Call this ONLY when the visitor explicitly asks for the resume, CV, a skills list, his availability/notice period, or specific experience details (years at a company, tech stack at a job). Do NOT call this for casual identity questions like 'who is akhilesh' or 'what does he do' — answer those from your own persona knowledge.",
     input_schema: { type: 'object', properties: {}, additionalProperties: false },
   },
   {
