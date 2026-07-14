@@ -30,6 +30,8 @@ function getGroq() {
 }
 
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4-5';
+const NVIDIA_MODEL = process.env.NVIDIA_MODEL || 'meta/llama-3.3-70b-instruct';
+const NVIDIA_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
 async function openRouterRequest(body) {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -382,6 +384,77 @@ function openRouterAvailable() {
   return key.startsWith('sk-or-');
 }
 
+function nvidiaAvailable() {
+  const key = process.env.NVIDIA_API_KEY || '';
+  return key.startsWith('nvapi-');
+}
+
+async function nvidiaRequest(body) {
+  const res = await fetch(NVIDIA_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`NVIDIA ${res.status}: ${text.slice(0, 200)}`);
+  }
+  return res.json();
+}
+
+async function runModelNvidia({ system, messages }) {
+  const convo = [
+    { role: 'system', content: system },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  let lastToolPayload = null;
+  let lastToolStatus = null;
+  let final = null;
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
+    const data = await nvidiaRequest({
+      model: NVIDIA_MODEL,
+      max_tokens: MAX_TOKENS,
+      temperature: 0.6,
+      tools: GROQ_TOOL_DEFS,
+      tool_choice: 'auto',
+      messages: convo,
+    });
+
+    const msg = data.choices[0].message;
+    const stopReason = data.choices[0].finish_reason;
+
+    if (stopReason === 'tool_calls' && Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
+      convo.push(msg);
+      for (const tc of msg.tool_calls) {
+        if (tc.type !== 'function') continue;
+        const impl = TOOL_IMPLS[tc.function.name];
+        let result;
+        try {
+          const args = JSON.parse(tc.function.arguments || '{}');
+          result = impl ? await impl(args) : { error: `unknown tool ${tc.function.name}` };
+          if (!result.error) { lastToolPayload = result; lastToolStatus = TOOL_STATUS[tc.function.name] || null; }
+        } catch (err) {
+          result = { error: String(err && err.message ? err.message : err) };
+        }
+        convo.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+      }
+      continue;
+    }
+
+    final = msg;
+    break;
+  }
+
+  const reply = final ? (final.content || '').trim() : '';
+  return { reply, payload: lastToolPayload, toolStatus: lastToolStatus };
+}
+
 async function runModelOpenRouter({ system, messages }) {
   const convo = [
     { role: 'system', content: system },
@@ -436,13 +509,21 @@ async function runModel(opts) {
     try {
       return await runModelGroq(opts);
     } catch (err) {
-      const fallback = openRouterAvailable() ? 'OpenRouter' : anthropicAvailable() ? 'Anthropic' : null;
-      if (!fallback) throw err;
-      console.warn(`[echo] Groq failed, falling back to ${fallback}:`, err.message);
-      if (fallback === 'OpenRouter') return runModelOpenRouter(opts);
+      console.warn('[echo] Groq failed, trying fallbacks:', err.message);
+      if (openRouterAvailable()) {
+        try { return await runModelOpenRouter(opts); } catch (e) { console.warn('[echo] OpenRouter failed:', e.message); }
+      }
+      if (nvidiaAvailable()) {
+        try { return await runModelNvidia(opts); } catch (e) { console.warn('[echo] NVIDIA failed:', e.message); }
+      }
+      if (anthropicAvailable()) return runModelAnthropic(opts);
+      throw err;
     }
   }
-  if (openRouterAvailable()) return runModelOpenRouter(opts);
+  if (openRouterAvailable()) {
+    try { return await runModelOpenRouter(opts); } catch (e) { console.warn('[echo] OpenRouter failed:', e.message); }
+  }
+  if (nvidiaAvailable()) return runModelNvidia(opts);
   return runModelAnthropic(opts);
 }
 
@@ -530,15 +611,22 @@ async function handleEchoStream(body = {}, emit) {
     try {
       result = await runModelGroqStream({ system, messages }, emit);
     } catch (err) {
-      const fallback = openRouterAvailable() ? 'OpenRouter' : anthropicAvailable() ? 'Anthropic' : null;
-      if (!fallback) throw err;
-      console.warn(`[echo] Groq stream failed, falling back to ${fallback}:`, err.message);
-      result = fallback === 'OpenRouter'
-        ? await runModelOpenRouter({ system, messages })
-        : await runModelAnthropic({ system, messages });
+      console.warn('[echo] Groq stream failed, trying fallbacks:', err.message);
+      if (openRouterAvailable()) {
+        try { result = await runModelOpenRouter({ system, messages }); } catch (e) { console.warn('[echo] OpenRouter failed:', e.message); }
+      }
+      if (!result && nvidiaAvailable()) {
+        try { result = await runModelNvidia({ system, messages }); } catch (e) { console.warn('[echo] NVIDIA failed:', e.message); }
+      }
+      if (!result && anthropicAvailable()) result = await runModelAnthropic({ system, messages });
+      if (!result) throw err;
     }
   } else if (openRouterAvailable()) {
-    result = await runModelOpenRouter({ system, messages });
+    try { result = await runModelOpenRouter({ system, messages }); } catch (e) { console.warn('[echo] OpenRouter failed:', e.message); }
+    if (!result && nvidiaAvailable()) result = await runModelNvidia({ system, messages });
+    if (!result) result = await runModelAnthropic({ system, messages });
+  } else if (nvidiaAvailable()) {
+    result = await runModelNvidia({ system, messages });
   } else {
     result = await runModelAnthropic({ system, messages });
   }

@@ -48,7 +48,7 @@ const BUBBLE_GAP = 6 // px above the head for the bubble tail tip
 const IDLE_ROTATE_MS = 3000
 const IDLE_FADE_MS = 450
 
-const BUBBLE_DISMISS_MS = 8000
+const BUBBLE_DISMISS_MS = 60000
 
 const IDLE_LINES = [
   'i pull his github live. ask.',
@@ -190,6 +190,7 @@ const CSS = `
   text-align: left;
   white-space: pre-line;
   border: 1px dotted var(--echo-ov-border);
+  border-radius: 12px;
   transform: translate(-50%, -100%);
   opacity: 0;
   transition: opacity 0.2s ease;
