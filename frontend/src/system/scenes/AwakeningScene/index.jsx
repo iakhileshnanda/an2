@@ -53,7 +53,7 @@ export default function AwakeningScene() {
             className="font-mono text-sm"
             style={{ color: '#8b949e', y: line3Y, opacity: line3O }}
           >
-            100 AI investor personas. one stock debate. one signal.
+            built in one night. shelved. still the sharpest thing on here.
           </motion.p>
           <motion.button
             className="font-mono text-sm mt-2 underline underline-offset-4 cursor-pointer bg-transparent border-none p-0"
