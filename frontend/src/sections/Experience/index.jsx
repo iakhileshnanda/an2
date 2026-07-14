@@ -67,8 +67,13 @@ export default function Experience() {
   const setFocusedTimeline = useEchoStore((s) => s.setFocusedTimeline);
 
   const daysSinceStart = Math.floor(
-    (Date.now() - new Date('2019-01-01').getTime()) / (1000 * 60 * 60 * 24)
+    (Date.now() - new Date('2020-10-01').getTime()) / (1000 * 60 * 60 * 24)
   );
+
+  const yearsLabel = (() => {
+    const y = daysSinceStart / 365;
+    return y % 1 >= 0.75 ? `nearly ${Math.ceil(y)} years` : `${Math.floor(y)}+ years`;
+  })();
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -136,13 +141,16 @@ export default function Experience() {
             transition={{ duration: 0.7, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <TypingPhrase />
-            <div className="flex items-baseline gap-4 mb-8">
+            <div className="flex items-baseline gap-4 mb-2">
               <span className="font-monument text-5xl md:text-7xl text-[#1B1716]">
                 {dayCount.toLocaleString()}
               </span>
               <span className="font-code text-xs tracking-widest text-[#1B1716]/50 uppercase">
                 days building
               </span>
+            </div>
+            <div className="font-code text-xs tracking-widest text-[#810100] uppercase mb-8">
+              {yearsLabel} and counting
             </div>
 
             {/* Current mission — one paragraph, above the live card */}
