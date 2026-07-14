@@ -69,7 +69,7 @@ const CAPABILITIES =
   '• pull his live github activity\n' +
   '• walk you through any project\n' +
   '• hand over the resume\n' +
-  '• answer salary + availability\n' +
+  '• answer availability + connect you directly\n' +
   '• remember you next visit\n' +
   'click me, then just ask.'
 

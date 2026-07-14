@@ -53,4 +53,4 @@ Treats AI tooling as a force multiplier — not a buzzword — with velocity num
 - Email: theakhileshnanda@gmail.com
 - Location: Bangalore, India (open to remote)
 - Availability: Actively looking, can join in 30 days
-- Target: 18–30 LPA
+- Compensation: discuss directly — theakhileshnanda@gmail.com

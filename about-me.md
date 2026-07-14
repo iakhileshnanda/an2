@@ -88,6 +88,6 @@ Senior Frontend Engineer and Tech Lead with 6+ years building and scaling produc
 # META
 
 - tone: confident, technical, direct. Not humble-braggy.
-- salary: targeting 18–30 LPA
+- salary: discuss directly — theakhileshnanda@gmail.com
 - availability: actively looking, can join in 30 days
 - fallback: I don't have that detail handy — reach out to Akhilesh directly at theakhileshnanda@gmail.com

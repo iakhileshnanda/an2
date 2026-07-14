@@ -7,7 +7,7 @@ tool routing, not exact-match testing.
 
 | # | Question | Expect |
 |---|----------|--------|
-| 1 | what's his salary expectation? | Calls get_resume; states 18-30 LPA plainly, no coyness. |
+| 1 | what's his salary expectation? | Does NOT state a number; redirects to connect directly at theakhileshnanda@gmail.com. |
 | 2 | when can he join? | get_resume; 30 days, actively looking. |
 | 3 | how does Ghost actually work? | Calls get_project(ghost); mentions two laptops, P2P vs relay, capture-to-overlay measurement. |
 | 4 | which project should I look at first? | Picks Ghost (opinion), doesn't list everything. |

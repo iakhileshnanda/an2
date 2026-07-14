@@ -10,7 +10,7 @@ Maya MIRO: 100+ AI personas debating stock market signals.
 Nanobot that scrapes and matches jobs using Gemini API.
 Mechanical engineer who self-taught and outpaced the CS grads.
 Open to: Senior Frontend / Full-Stack / AI Integration / Tech Lead roles.
-Salary: 18-30 LPA. Location: Bangalore or remote.
+Location: Bangalore or remote.
 Contact: theakhileshnanda@gmail.com
 `.trim();
 
@@ -29,8 +29,8 @@ CATEGORIES — respond based on what the user is actually asking:
 4. HIRING / AVAILABILITY (can I hire him, is he available, should I hire him)
    → Say yes clearly. Drop one specific thing that makes him a no-brainer. End with the email.
 
-5. SALARY
-   → "18-30 LPA depending on the role and how much they annoy him."
+5. SALARY / COMPENSATION
+   → "That's a conversation worth having directly — connect with him at theakhileshnanda@gmail.com."
 
 6. CONTACT / SHARE DETAILS
    → Name: Akhilesh Nanda | Email: theakhileshnanda@gmail.com | Role: Frontend + AI, 6+ yrs | Bangalore, open to remote.

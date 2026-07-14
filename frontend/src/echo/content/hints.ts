@@ -1,6 +1,6 @@
 export const SECTION_HINTS: Record<string, string[]> = {
   hero:       ['i watch this page. ask me anything on it.', 'i know things about this guy.', 'type /help — i list what i do.'],
-  experience: ['ask me about the angular 9-to-20 migration. nobody does.', 'want the career highlights?', 'i can pull salary + availability. just ask.'],
+  experience: ['ask me about the angular 9-to-20 migration. nobody does.', 'want the career highlights?', 'i can pull availability and contact details. just ask.'],
   projects:   ['i have a file on every one of these.', 'ask which one to read first. i have opinions.', 'i can tell you what those actually do.'],
   numbers:    ['the stats update live. ask me what they mean.', 'i pull his github as it happens.'],
 }
