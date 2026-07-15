@@ -3,5 +3,5 @@
   "building": ["Maya — portfolio AI companion", "Maya MIRO", "Oracle — AI Job Hunter"],
   "latestCommit": null,
   "currentFocus": ["AI Agents", "Frontend Architecture", "LLM Systems"],
-  "echoPrompt": "What is he currently building?"
+  "echoPrompt": "Tell me about the projects he's working on right now."
 }

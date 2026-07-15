@@ -11,7 +11,7 @@ const TOOL_DEFS = [
   {
     name: 'get_github_activity',
     description:
-      "Fetch Akhilesh's LIVE GitHub activity: latest pushed repo, its last commit, repo/follower counts, and top repositories across ALL of his repos — public and private (when a token is configured). Call this whenever the visitor asks what he's building now, his recent work, his code, his GitHub, or repo/commit stats. Optionally pass `query` to search/filter across every repo by name, description, language, or topic (e.g. \"agent\", \"neo4j\", \"angular\"); omit it for overall latest activity. Do not invent these numbers — only state them after this returns.",
+      "Fetch Akhilesh's LIVE GitHub activity: latest pushed repo, its last commit, repo/follower counts, and top repositories. Call this ONLY when the visitor explicitly asks about GitHub, a specific repo, commit history, live code stats, or asks for the exact latest thing he pushed/committed. Do NOT call this for general greetings, casual 'what does he do' questions, broad 'what is he building' questions, or anything you can answer from persona knowledge. Do NOT call this speculatively to enrich context — only call it when the visitor's message clearly cannot be answered without live repo data. Optionally pass `query` to search/filter repos by name, description, language, or topic; omit for overall latest activity. Never invent numbers — only state them after this returns.",
     input_schema: {
       type: 'object',
       properties: {
@@ -27,7 +27,7 @@ const TOOL_DEFS = [
   {
     name: 'get_resume',
     description:
-      "Read Akhilesh's current structured résumé: summary, skills, experience, projects, contact links, availability, and résumé URL. Call this ONLY when the visitor explicitly asks for the resume, CV, a skills list, his availability/notice period, or specific experience details (years at a company, tech stack at a job). Do NOT call this for casual identity questions like 'who is akhilesh' or 'what does he do' — answer those from your own persona knowledge.",
+      "Read Akhilesh's current structured résumé: summary, skills, experience, projects, contact links, availability, and résumé URL. Call this ONLY when the visitor explicitly asks for the resume, CV, a downloadable link, a skills list, his availability/notice period, or precise experience details (exact years at a company, full tech stack at a job). Do NOT call this for casual questions about his work history, what he did at a company, or general 'tell me about him' questions — answer those from your own persona knowledge or use get_project for project-specific questions. Never call this as a fallback when you're unsure what tool to use.",
     input_schema: { type: 'object', properties: {}, additionalProperties: false },
   },
   {
